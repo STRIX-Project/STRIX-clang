@@ -58,8 +58,8 @@
 #include "llvm/ADT/Optional.h"
 #include "llvm/ADT/SetVector.h"
 #include "llvm/ADT/SmallBitVector.h"
-#include "llvm/ADT/SmallSet.h"
 #include "llvm/ADT/SmallPtrSet.h"
+#include "llvm/ADT/SmallSet.h"
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/ADT/TinyPtrVector.h"
 #include "llvm/Frontend/OpenMP/OMPConstants.h"
@@ -568,14 +568,14 @@ public:
   // #pragma pack.
   // Sentinel to represent when the stack is set to mac68k alignment.
   static const unsigned kMac68kAlignmentSentinel = ~0U;
-  PragmaStack<unsigned> PackStack;
-  // The current #pragma pack values and locations at each #include.
-  struct PackIncludeState {
+  PragmaStack<unsigned> AlignPackStack;
+  // The current #pragma align/pack values and locations at each #include.
+  struct AlignPackIncludeState {
     unsigned CurrentValue;
     SourceLocation CurrentPragmaLocation;
     bool HasNonDefaultValue, ShouldWarnOnInclude;
   };
-  SmallVector<PackIncludeState, 8> PackIncludeStack;
+  SmallVector<AlignPackIncludeState, 8> AlignPackIncludeStack;
   // Segment #pragmas.
   PragmaStack<StringLiteral *> DataSegStack;
   PragmaStack<StringLiteral *> BSSSegStack;
@@ -2139,6 +2139,16 @@ public:
     return RequireCompleteType(Loc, T, CompleteTypeKind::Normal, Diagnoser);
   }
 
+  /// Get the type of expression E, triggering instantiation to complete the
+  /// type if necessary -- that is, if the expression refers to a templated
+  /// static data member of incomplete array type.
+  ///
+  /// May still return an incomplete type if instantiation was not possible or
+  /// if the type is incomplete for a different reason. Use
+  /// RequireCompleteExprType instead if a diagnostic is expected for an
+  /// incomplete expression type.
+  QualType getCompletedType(Expr *E);
+
   void completeExprArrayBound(Expr *E);
   bool RequireCompleteExprType(Expr *E, CompleteTypeKind Kind,
                                TypeDiagnoser &Diagnoser);
@@ -3200,6 +3210,9 @@ public:
       Decl *D, const WebAssemblyImportNameAttr &AL);
   WebAssemblyImportModuleAttr *mergeImportModuleAttr(
       Decl *D, const WebAssemblyImportModuleAttr &AL);
+  EnforceTCBAttr *mergeEnforceTCBAttr(Decl *D, const EnforceTCBAttr &AL);
+  EnforceTCBLeafAttr *mergeEnforceTCBLeafAttr(Decl *D,
+                                              const EnforceTCBLeafAttr &AL);
 
   void mergeDeclAttributes(NamedDecl *New, Decl *Old,
                            AvailabilityMergeKind AMK = AMK_Redeclaration);
@@ -3723,11 +3736,11 @@ public:
                                                 SourceLocation RLoc,
                                                 Expr *Base,Expr *Idx);
 
-  ExprResult
-  BuildCallToMemberFunction(Scope *S, Expr *MemExpr,
-                            SourceLocation LParenLoc,
-                            MultiExprArg Args,
-                            SourceLocation RParenLoc);
+  ExprResult BuildCallToMemberFunction(Scope *S, Expr *MemExpr,
+                                       SourceLocation LParenLoc,
+                                       MultiExprArg Args,
+                                       SourceLocation RParenLoc,
+                                       bool AllowRecovery = false);
   ExprResult
   BuildCallToObjectOfClassType(Scope *S, Expr *Object, SourceLocation LParenLoc,
                                MultiExprArg Args,
@@ -5238,7 +5251,8 @@ public:
   ExprResult BuildCallExpr(Scope *S, Expr *Fn, SourceLocation LParenLoc,
                            MultiExprArg ArgExprs, SourceLocation RParenLoc,
                            Expr *ExecConfig = nullptr,
-                           bool IsExecConfig = false);
+                           bool IsExecConfig = false,
+                           bool AllowRecovery = false);
   enum class AtomicArgumentOrder { API, AST };
   ExprResult
   BuildAtomicExpr(SourceRange CallRange, SourceRange ExprRange,
@@ -9720,14 +9734,14 @@ public:
   void ActOnPragmaPack(SourceLocation PragmaLoc, PragmaMsStackAction Action,
                        StringRef SlotLabel, Expr *Alignment);
 
-  enum class PragmaPackDiagnoseKind {
+  enum class PragmaAlignPackDiagnoseKind {
     NonDefaultStateAtInclude,
     ChangedStateAtExit
   };
 
-  void DiagnoseNonDefaultPragmaPack(PragmaPackDiagnoseKind Kind,
-                                    SourceLocation IncludeLoc);
-  void DiagnoseUnterminatedPragmaPack();
+  void DiagnoseNonDefaultPragmaAlignPack(PragmaAlignPackDiagnoseKind Kind,
+                                         SourceLocation IncludeLoc);
+  void DiagnoseUnterminatedPragmaAlignPack();
 
   /// ActOnPragmaMSStruct - Called on well formed \#pragma ms_struct [on|off].
   void ActOnPragmaMSStruct(PragmaMSStructKind Kind);
@@ -9756,9 +9770,8 @@ public:
     PSK_CodeSeg,
   };
 
-  bool UnifySection(StringRef SectionName,
-                    int SectionFlags,
-                    DeclaratorDecl *TheDecl);
+  bool UnifySection(StringRef SectionName, int SectionFlags,
+                    NamedDecl *TheDecl);
   bool UnifySection(StringRef SectionName,
                     int SectionFlags,
                     SourceLocation PragmaSectionLocation);
@@ -10127,6 +10140,13 @@ private:
   /// The current `omp begin/end declare variant` scopes.
   SmallVector<OMPDeclareVariantScope, 4> OMPDeclareVariantScopes;
 
+  /// The current `omp begin/end assumes` scopes.
+  SmallVector<AssumptionAttr *, 4> OMPAssumeScoped;
+
+  /// All `omp assumes` we encountered so far.
+  SmallVector<AssumptionAttr *, 4> OMPAssumeGlobal;
+
+public:
   /// The declarator \p D defines a function in the scope \p S which is nested
   /// in an `omp begin/end declare variant` scope. In this method we create a
   /// declaration for \p D and rename \p D according to the OpenMP context
@@ -10140,10 +10160,11 @@ private:
   void ActOnFinishedFunctionDefinitionInOpenMPDeclareVariantScope(
       Decl *D, SmallVectorImpl<FunctionDecl *> &Bases);
 
-public:
+  /// Act on \p D, a function definition inside of an `omp [begin/end] assumes`.
+  void ActOnFinishedFunctionDefinitionInOpenMPAssumeScope(Decl *D);
 
-  /// Can we exit a scope at the moment.
-  bool isInOpenMPDeclareVariantScope() {
+  /// Can we exit an OpenMP declare variant scope at the moment.
+  bool isInOpenMPDeclareVariantScope() const {
     return !OMPDeclareVariantScopes.empty();
   }
 
@@ -10259,6 +10280,22 @@ public:
                                               ArrayRef<Expr *> VarList,
                                               ArrayRef<OMPClause *> Clauses,
                                               DeclContext *Owner = nullptr);
+
+  /// Called on well-formed '#pragma omp [begin] assume[s]'.
+  void ActOnOpenMPAssumesDirective(SourceLocation Loc,
+                                   OpenMPDirectiveKind DKind,
+                                   ArrayRef<StringRef> Assumptions,
+                                   bool SkippedClauses);
+
+  /// Check if there is an active global `omp begin assumes` directive.
+  bool isInOpenMPAssumeScope() const { return !OMPAssumeScoped.empty(); }
+
+  /// Check if there is an active global `omp assumes` directive.
+  bool hasGlobalOpenMPAssumes() const { return !OMPAssumeGlobal.empty(); }
+
+  /// Called on well-formed '#pragma omp end assumes'.
+  void ActOnOpenMPEndAssumesDirective();
+
   /// Called on well-formed '#pragma omp requires'.
   DeclGroupPtrTy ActOnOpenMPRequiresDirective(SourceLocation Loc,
                                               ArrayRef<OMPClause *> ClauseList);
@@ -12393,6 +12430,8 @@ private:
   /// attempts to add itself into the container
   void CheckObjCCircularContainer(ObjCMessageExpr *Message);
 
+  void CheckTCBEnforcement(const CallExpr *TheCall, const FunctionDecl *Callee);
+
   void AnalyzeDeleteExprMismatch(const CXXDeleteExpr *DE);
   void AnalyzeDeleteExprMismatch(FieldDecl *Field, SourceLocation DeleteLoc,
                                  bool DeleteWasArrayForm);
@@ -12448,6 +12487,7 @@ private:
   /// Nullability type specifiers.
   IdentifierInfo *Ident__Nonnull = nullptr;
   IdentifierInfo *Ident__Nullable = nullptr;
+  IdentifierInfo *Ident__Nullable_result = nullptr;
   IdentifierInfo *Ident__Null_unspecified = nullptr;
 
   IdentifierInfo *Ident_NSError = nullptr;

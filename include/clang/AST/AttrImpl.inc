@@ -3425,6 +3425,88 @@ const char *AssumeAlignedAttr::getSpelling() const {
 }
 
 
+// AssumptionAttr implementation
+
+AssumptionAttr *AssumptionAttr::CreateImplicit(ASTContext &Ctx, llvm::StringRef Assumption, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) AssumptionAttr(Ctx, CommonInfo, Assumption);
+  A->setImplicit(true);
+  if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+    A->setAttributeSpellingListIndex(0);
+  return A;
+}
+
+AssumptionAttr *AssumptionAttr::Create(ASTContext &Ctx, llvm::StringRef Assumption, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) AssumptionAttr(Ctx, CommonInfo, Assumption);
+  if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+    A->setAttributeSpellingListIndex(0);
+  return A;
+}
+
+AssumptionAttr *AssumptionAttr::CreateImplicit(ASTContext &Ctx, llvm::StringRef Assumption, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+  AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  return CreateImplicit(Ctx, Assumption, I);
+}
+
+AssumptionAttr *AssumptionAttr::Create(ASTContext &Ctx, llvm::StringRef Assumption, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+  AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  return Create(Ctx, Assumption, I);
+}
+
+AssumptionAttr::AssumptionAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
+              , llvm::StringRef Assumption
+             )
+  : InheritableAttr(Ctx, CommonInfo, attr::Assumption, false, true)
+              , assumptionLength(Assumption.size()),assumption(new (Ctx, 1) char[assumptionLength])
+  {
+    if (!Assumption.empty())
+      std::memcpy(assumption, Assumption.data(), assumptionLength);
+}
+
+
+
+AssumptionAttr *AssumptionAttr::clone(ASTContext &C) const {
+  auto *A = new (C) AssumptionAttr(C, *this, getAssumption());
+  A->Inherited = Inherited;
+  A->IsPackExpansion = IsPackExpansion;
+  A->setImplicit(Implicit);
+  return A;
+}
+
+void AssumptionAttr::printPretty(raw_ostream &OS, const PrintingPolicy &Policy) const {
+  switch (getAttributeSpellingListIndex()) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    break;
+  case 0 : {
+    OS << " __attribute__((assume(\"" << getAssumption() << "\")))";
+    break;
+  }
+  case 1 : {
+    OS << " [[clang::assume(\"" << getAssumption() << "\")]]";
+    break;
+  }
+  case 2 : {
+    OS << " [[clang::assume(\"" << getAssumption() << "\")]]";
+    break;
+  }
+}
+}
+
+const char *AssumptionAttr::getSpelling() const {
+  switch (getAttributeSpellingListIndex()) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    return "(No spelling)";
+  case 0:
+    return "assume";
+  case 1:
+    return "assume";
+  case 2:
+    return "assume";
+  }
+}
+
+
 // AvailabilityAttr implementation
 
 AvailabilityAttr *AvailabilityAttr::CreateImplicit(ASTContext &Ctx, IdentifierInfo * Platform, VersionTuple Introduced, VersionTuple Deprecated, VersionTuple Obsoleted, bool Unavailable, llvm::StringRef Message, bool Strict, llvm::StringRef Replacement, int Priority, const AttributeCommonInfo &CommonInfo) {
@@ -5626,6 +5708,82 @@ const char *CallbackAttr::getSpelling() const {
 }
 
 
+// CalledOnceAttr implementation
+
+CalledOnceAttr *CalledOnceAttr::CreateImplicit(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) CalledOnceAttr(Ctx, CommonInfo);
+  A->setImplicit(true);
+  if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+    A->setAttributeSpellingListIndex(0);
+  return A;
+}
+
+CalledOnceAttr *CalledOnceAttr::Create(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) CalledOnceAttr(Ctx, CommonInfo);
+  if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+    A->setAttributeSpellingListIndex(0);
+  return A;
+}
+
+CalledOnceAttr *CalledOnceAttr::CreateImplicit(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+  AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  return CreateImplicit(Ctx, I);
+}
+
+CalledOnceAttr *CalledOnceAttr::Create(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+  AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  return Create(Ctx, I);
+}
+
+CalledOnceAttr::CalledOnceAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
+             )
+  : Attr(Ctx, CommonInfo, attr::CalledOnce, false)
+  {
+}
+
+CalledOnceAttr *CalledOnceAttr::clone(ASTContext &C) const {
+  auto *A = new (C) CalledOnceAttr(C, *this);
+  A->Inherited = Inherited;
+  A->IsPackExpansion = IsPackExpansion;
+  A->setImplicit(Implicit);
+  return A;
+}
+
+void CalledOnceAttr::printPretty(raw_ostream &OS, const PrintingPolicy &Policy) const {
+  switch (getAttributeSpellingListIndex()) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    break;
+  case 0 : {
+    OS << " __attribute__((called_once))";
+    break;
+  }
+  case 1 : {
+    OS << " [[clang::called_once]]";
+    break;
+  }
+  case 2 : {
+    OS << " [[clang::called_once]]";
+    break;
+  }
+}
+}
+
+const char *CalledOnceAttr::getSpelling() const {
+  switch (getAttributeSpellingListIndex()) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    return "(No spelling)";
+  case 0:
+    return "called_once";
+  case 1:
+    return "called_once";
+  case 2:
+    return "called_once";
+  }
+}
+
+
 // CapabilityAttr implementation
 
 CapabilityAttr *CapabilityAttr::CreateImplicit(ASTContext &Ctx, llvm::StringRef Name, const AttributeCommonInfo &CommonInfo) {
@@ -7674,6 +7832,170 @@ const char *EnableIfAttr::getSpelling() const {
 }
 
 
+// EnforceTCBAttr implementation
+
+EnforceTCBAttr *EnforceTCBAttr::CreateImplicit(ASTContext &Ctx, llvm::StringRef TCBName, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) EnforceTCBAttr(Ctx, CommonInfo, TCBName);
+  A->setImplicit(true);
+  if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+    A->setAttributeSpellingListIndex(0);
+  return A;
+}
+
+EnforceTCBAttr *EnforceTCBAttr::Create(ASTContext &Ctx, llvm::StringRef TCBName, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) EnforceTCBAttr(Ctx, CommonInfo, TCBName);
+  if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+    A->setAttributeSpellingListIndex(0);
+  return A;
+}
+
+EnforceTCBAttr *EnforceTCBAttr::CreateImplicit(ASTContext &Ctx, llvm::StringRef TCBName, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+  AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  return CreateImplicit(Ctx, TCBName, I);
+}
+
+EnforceTCBAttr *EnforceTCBAttr::Create(ASTContext &Ctx, llvm::StringRef TCBName, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+  AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  return Create(Ctx, TCBName, I);
+}
+
+EnforceTCBAttr::EnforceTCBAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
+              , llvm::StringRef TCBName
+             )
+  : InheritableAttr(Ctx, CommonInfo, attr::EnforceTCB, false, true)
+              , tCBNameLength(TCBName.size()),tCBName(new (Ctx, 1) char[tCBNameLength])
+  {
+    if (!TCBName.empty())
+      std::memcpy(tCBName, TCBName.data(), tCBNameLength);
+}
+
+
+
+EnforceTCBAttr *EnforceTCBAttr::clone(ASTContext &C) const {
+  auto *A = new (C) EnforceTCBAttr(C, *this, getTCBName());
+  A->Inherited = Inherited;
+  A->IsPackExpansion = IsPackExpansion;
+  A->setImplicit(Implicit);
+  return A;
+}
+
+void EnforceTCBAttr::printPretty(raw_ostream &OS, const PrintingPolicy &Policy) const {
+  switch (getAttributeSpellingListIndex()) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    break;
+  case 0 : {
+    OS << " __attribute__((enforce_tcb(\"" << getTCBName() << "\")))";
+    break;
+  }
+  case 1 : {
+    OS << " [[clang::enforce_tcb(\"" << getTCBName() << "\")]]";
+    break;
+  }
+  case 2 : {
+    OS << " [[clang::enforce_tcb(\"" << getTCBName() << "\")]]";
+    break;
+  }
+}
+}
+
+const char *EnforceTCBAttr::getSpelling() const {
+  switch (getAttributeSpellingListIndex()) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    return "(No spelling)";
+  case 0:
+    return "enforce_tcb";
+  case 1:
+    return "enforce_tcb";
+  case 2:
+    return "enforce_tcb";
+  }
+}
+
+
+// EnforceTCBLeafAttr implementation
+
+EnforceTCBLeafAttr *EnforceTCBLeafAttr::CreateImplicit(ASTContext &Ctx, llvm::StringRef TCBName, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) EnforceTCBLeafAttr(Ctx, CommonInfo, TCBName);
+  A->setImplicit(true);
+  if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+    A->setAttributeSpellingListIndex(0);
+  return A;
+}
+
+EnforceTCBLeafAttr *EnforceTCBLeafAttr::Create(ASTContext &Ctx, llvm::StringRef TCBName, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) EnforceTCBLeafAttr(Ctx, CommonInfo, TCBName);
+  if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+    A->setAttributeSpellingListIndex(0);
+  return A;
+}
+
+EnforceTCBLeafAttr *EnforceTCBLeafAttr::CreateImplicit(ASTContext &Ctx, llvm::StringRef TCBName, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+  AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  return CreateImplicit(Ctx, TCBName, I);
+}
+
+EnforceTCBLeafAttr *EnforceTCBLeafAttr::Create(ASTContext &Ctx, llvm::StringRef TCBName, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+  AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  return Create(Ctx, TCBName, I);
+}
+
+EnforceTCBLeafAttr::EnforceTCBLeafAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
+              , llvm::StringRef TCBName
+             )
+  : InheritableAttr(Ctx, CommonInfo, attr::EnforceTCBLeaf, false, true)
+              , tCBNameLength(TCBName.size()),tCBName(new (Ctx, 1) char[tCBNameLength])
+  {
+    if (!TCBName.empty())
+      std::memcpy(tCBName, TCBName.data(), tCBNameLength);
+}
+
+
+
+EnforceTCBLeafAttr *EnforceTCBLeafAttr::clone(ASTContext &C) const {
+  auto *A = new (C) EnforceTCBLeafAttr(C, *this, getTCBName());
+  A->Inherited = Inherited;
+  A->IsPackExpansion = IsPackExpansion;
+  A->setImplicit(Implicit);
+  return A;
+}
+
+void EnforceTCBLeafAttr::printPretty(raw_ostream &OS, const PrintingPolicy &Policy) const {
+  switch (getAttributeSpellingListIndex()) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    break;
+  case 0 : {
+    OS << " __attribute__((enforce_tcb_leaf(\"" << getTCBName() << "\")))";
+    break;
+  }
+  case 1 : {
+    OS << " [[clang::enforce_tcb_leaf(\"" << getTCBName() << "\")]]";
+    break;
+  }
+  case 2 : {
+    OS << " [[clang::enforce_tcb_leaf(\"" << getTCBName() << "\")]]";
+    break;
+  }
+}
+}
+
+const char *EnforceTCBLeafAttr::getSpelling() const {
+  switch (getAttributeSpellingListIndex()) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    return "(No spelling)";
+  case 0:
+    return "enforce_tcb_leaf";
+  case 1:
+    return "enforce_tcb_leaf";
+  case 2:
+    return "enforce_tcb_leaf";
+  }
+}
+
+
 // EnumExtensibilityAttr implementation
 
 EnumExtensibilityAttr *EnumExtensibilityAttr::CreateImplicit(ASTContext &Ctx, Kind Extensibility, const AttributeCommonInfo &CommonInfo) {
@@ -9704,6 +10026,82 @@ const char *LayoutVersionAttr::getSpelling() const {
 }
 
 
+// LeafAttr implementation
+
+LeafAttr *LeafAttr::CreateImplicit(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) LeafAttr(Ctx, CommonInfo);
+  A->setImplicit(true);
+  if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+    A->setAttributeSpellingListIndex(0);
+  return A;
+}
+
+LeafAttr *LeafAttr::Create(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) LeafAttr(Ctx, CommonInfo);
+  if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+    A->setAttributeSpellingListIndex(0);
+  return A;
+}
+
+LeafAttr *LeafAttr::CreateImplicit(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+  AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  return CreateImplicit(Ctx, I);
+}
+
+LeafAttr *LeafAttr::Create(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+  AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  return Create(Ctx, I);
+}
+
+LeafAttr::LeafAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
+             )
+  : InheritableAttr(Ctx, CommonInfo, attr::Leaf, false, false)
+  {
+}
+
+LeafAttr *LeafAttr::clone(ASTContext &C) const {
+  auto *A = new (C) LeafAttr(C, *this);
+  A->Inherited = Inherited;
+  A->IsPackExpansion = IsPackExpansion;
+  A->setImplicit(Implicit);
+  return A;
+}
+
+void LeafAttr::printPretty(raw_ostream &OS, const PrintingPolicy &Policy) const {
+  switch (getAttributeSpellingListIndex()) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    break;
+  case 0 : {
+    OS << " __attribute__((leaf))";
+    break;
+  }
+  case 1 : {
+    OS << " [[gnu::leaf]]";
+    break;
+  }
+  case 2 : {
+    OS << " [[gnu::leaf]]";
+    break;
+  }
+}
+}
+
+const char *LeafAttr::getSpelling() const {
+  switch (getAttributeSpellingListIndex()) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    return "(No spelling)";
+  case 0:
+    return "leaf";
+  case 1:
+    return "leaf";
+  case 2:
+    return "leaf";
+  }
+}
+
+
 // LifetimeBoundAttr implementation
 
 LifetimeBoundAttr *LifetimeBoundAttr::CreateImplicit(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo) {
@@ -10166,6 +10564,8 @@ bool LoopHintAttr::ConvertStrToLoopHintState(StringRef Val, LoopHintState &Out) 
     .Case("enable", LoopHintAttr::Enable)
     .Case("disable", LoopHintAttr::Disable)
     .Case("numeric", LoopHintAttr::Numeric)
+    .Case("fixed_width", LoopHintAttr::FixedWidth)
+    .Case("scalable_width", LoopHintAttr::ScalableWidth)
     .Case("assume_safety", LoopHintAttr::AssumeSafety)
     .Case("full", LoopHintAttr::Full)
     .Default(Optional<LoopHintState>());
@@ -10181,6 +10581,8 @@ const char *LoopHintAttr::ConvertLoopHintStateToStr(LoopHintState Val) {
   case LoopHintAttr::Enable: return "enable";
   case LoopHintAttr::Disable: return "disable";
   case LoopHintAttr::Numeric: return "numeric";
+  case LoopHintAttr::FixedWidth: return "fixed_width";
+  case LoopHintAttr::ScalableWidth: return "scalable_width";
   case LoopHintAttr::AssumeSafety: return "assume_safety";
   case LoopHintAttr::Full: return "full";
   }
@@ -13045,7 +13447,7 @@ NoMergeAttr *NoMergeAttr::Create(ASTContext &Ctx, SourceRange Range, AttributeCo
 
 NoMergeAttr::NoMergeAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
              )
-  : StmtAttr(Ctx, CommonInfo, attr::NoMerge, false)
+  : DeclOrStmtAttr(Ctx, CommonInfo, attr::NoMerge, false, true)
   {
 }
 
@@ -19702,6 +20104,80 @@ const char *PragmaClangTextSectionAttr::getSpelling() const {
 }
 
 
+// PreferredNameAttr implementation
+
+PreferredNameAttr *PreferredNameAttr::CreateImplicit(ASTContext &Ctx, TypeSourceInfo * TypedefType, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) PreferredNameAttr(Ctx, CommonInfo, TypedefType);
+  A->setImplicit(true);
+  if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+    A->setAttributeSpellingListIndex(0);
+  return A;
+}
+
+PreferredNameAttr *PreferredNameAttr::Create(ASTContext &Ctx, TypeSourceInfo * TypedefType, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) PreferredNameAttr(Ctx, CommonInfo, TypedefType);
+  if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+    A->setAttributeSpellingListIndex(0);
+  return A;
+}
+
+PreferredNameAttr *PreferredNameAttr::CreateImplicit(ASTContext &Ctx, TypeSourceInfo * TypedefType, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+  AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  return CreateImplicit(Ctx, TypedefType, I);
+}
+
+PreferredNameAttr *PreferredNameAttr::Create(ASTContext &Ctx, TypeSourceInfo * TypedefType, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+  AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  return Create(Ctx, TypedefType, I);
+}
+
+PreferredNameAttr::PreferredNameAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
+              , TypeSourceInfo * TypedefType
+             )
+  : InheritableAttr(Ctx, CommonInfo, attr::PreferredName, false, true)
+              , typedefType(TypedefType)
+  {
+}
+
+
+
+PreferredNameAttr *PreferredNameAttr::clone(ASTContext &C) const {
+  auto *A = new (C) PreferredNameAttr(C, *this, typedefType);
+  A->Inherited = Inherited;
+  A->IsPackExpansion = IsPackExpansion;
+  A->setImplicit(Implicit);
+  return A;
+}
+
+void PreferredNameAttr::printPretty(raw_ostream &OS, const PrintingPolicy &Policy) const {
+  switch (getAttributeSpellingListIndex()) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    break;
+  case 0 : {
+    OS << " __attribute__((preferred_name(" << getTypedefType().getAsString() << ")))";
+    break;
+  }
+  case 1 : {
+    OS << " [[clang::preferred_name(" << getTypedefType().getAsString() << ")]]";
+    break;
+  }
+}
+}
+
+const char *PreferredNameAttr::getSpelling() const {
+  switch (getAttributeSpellingListIndex()) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    return "(No spelling)";
+  case 0:
+    return "preferred_name";
+  case 1:
+    return "preferred_name";
+  }
+}
+
+
 // PreserveAllAttr implementation
 
 PreserveAllAttr *PreserveAllAttr::CreateImplicit(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo) {
@@ -22351,6 +22827,153 @@ const char *SuppressAttr::getSpelling() const {
 }
 
 
+// SwiftAsyncAttr implementation
+
+SwiftAsyncAttr *SwiftAsyncAttr::CreateImplicit(ASTContext &Ctx, Kind Kind, ParamIdx CompletionHandlerIndex, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) SwiftAsyncAttr(Ctx, CommonInfo, Kind, CompletionHandlerIndex);
+  A->setImplicit(true);
+  if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+    A->setAttributeSpellingListIndex(0);
+  return A;
+}
+
+SwiftAsyncAttr *SwiftAsyncAttr::Create(ASTContext &Ctx, Kind Kind, ParamIdx CompletionHandlerIndex, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) SwiftAsyncAttr(Ctx, CommonInfo, Kind, CompletionHandlerIndex);
+  if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+    A->setAttributeSpellingListIndex(0);
+  return A;
+}
+
+SwiftAsyncAttr *SwiftAsyncAttr::CreateImplicit(ASTContext &Ctx, Kind Kind, ParamIdx CompletionHandlerIndex, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+  AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  return CreateImplicit(Ctx, Kind, CompletionHandlerIndex, I);
+}
+
+SwiftAsyncAttr *SwiftAsyncAttr::Create(ASTContext &Ctx, Kind Kind, ParamIdx CompletionHandlerIndex, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+  AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  return Create(Ctx, Kind, CompletionHandlerIndex, I);
+}
+
+SwiftAsyncAttr::SwiftAsyncAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
+              , Kind Kind
+              , ParamIdx CompletionHandlerIndex
+             )
+  : InheritableAttr(Ctx, CommonInfo, attr::SwiftAsync, false, false)
+              , kind(Kind)
+              , completionHandlerIndex(CompletionHandlerIndex)
+  {
+}
+
+SwiftAsyncAttr::SwiftAsyncAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
+              , Kind Kind
+             )
+  : InheritableAttr(Ctx, CommonInfo, attr::SwiftAsync, false, false)
+              , kind(Kind)
+              , completionHandlerIndex()
+  {
+}
+
+
+
+bool SwiftAsyncAttr::ConvertStrToKind(StringRef Val, Kind &Out) {
+  Optional<Kind> R = llvm::StringSwitch<Optional<Kind>>(Val)
+    .Case("none", SwiftAsyncAttr::None)
+    .Case("swift_private", SwiftAsyncAttr::SwiftPrivate)
+    .Case("not_swift_private", SwiftAsyncAttr::NotSwiftPrivate)
+    .Default(Optional<Kind>());
+  if (R) {
+    Out = *R;
+      return true;
+    }
+  return false;
+}
+
+const char *SwiftAsyncAttr::ConvertKindToStr(Kind Val) {
+  switch(Val) {
+  case SwiftAsyncAttr::None: return "none";
+  case SwiftAsyncAttr::SwiftPrivate: return "swift_private";
+  case SwiftAsyncAttr::NotSwiftPrivate: return "not_swift_private";
+  }
+  llvm_unreachable("No enumerator with that value");
+}
+
+
+SwiftAsyncAttr *SwiftAsyncAttr::clone(ASTContext &C) const {
+  auto *A = new (C) SwiftAsyncAttr(C, *this, kind, completionHandlerIndex);
+  A->Inherited = Inherited;
+  A->IsPackExpansion = IsPackExpansion;
+  A->setImplicit(Implicit);
+  return A;
+}
+
+void SwiftAsyncAttr::printPretty(raw_ostream &OS, const PrintingPolicy &Policy) const {
+  switch (getAttributeSpellingListIndex()) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    break;
+  case 0 : {
+    OS << " __attribute__((swift_async";
+    unsigned TrailingOmittedArgs = 0;
+    if (!getCompletionHandlerIndex().isValid())
+      ++TrailingOmittedArgs;
+    OS << "(\"" << SwiftAsyncAttr::ConvertKindToStr(getKind()) << "\"";
+    if (1 < 2 - TrailingOmittedArgs)
+      OS << ", ";
+    OS << "";
+    if (!(!getCompletionHandlerIndex().isValid())) {
+      OS << "" << getCompletionHandlerIndex().getSourceIndex() << "";
+    }
+    OS << ")))";
+    break;
+  }
+  case 1 : {
+    OS << " [[clang::swift_async";
+    unsigned TrailingOmittedArgs = 0;
+    if (!getCompletionHandlerIndex().isValid())
+      ++TrailingOmittedArgs;
+    OS << "(\"" << SwiftAsyncAttr::ConvertKindToStr(getKind()) << "\"";
+    if (1 < 2 - TrailingOmittedArgs)
+      OS << ", ";
+    OS << "";
+    if (!(!getCompletionHandlerIndex().isValid())) {
+      OS << "" << getCompletionHandlerIndex().getSourceIndex() << "";
+    }
+    OS << ")]]";
+    break;
+  }
+  case 2 : {
+    OS << " [[clang::swift_async";
+    unsigned TrailingOmittedArgs = 0;
+    if (!getCompletionHandlerIndex().isValid())
+      ++TrailingOmittedArgs;
+    OS << "(\"" << SwiftAsyncAttr::ConvertKindToStr(getKind()) << "\"";
+    if (1 < 2 - TrailingOmittedArgs)
+      OS << ", ";
+    OS << "";
+    if (!(!getCompletionHandlerIndex().isValid())) {
+      OS << "" << getCompletionHandlerIndex().getSourceIndex() << "";
+    }
+    OS << ")]]";
+    break;
+  }
+}
+}
+
+const char *SwiftAsyncAttr::getSpelling() const {
+  switch (getAttributeSpellingListIndex()) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    return "(No spelling)";
+  case 0:
+    return "swift_async";
+  case 1:
+    return "swift_async";
+  case 2:
+    return "swift_async";
+  }
+}
+
+
 // SwiftAsyncNameAttr implementation
 
 SwiftAsyncNameAttr *SwiftAsyncNameAttr::CreateImplicit(ASTContext &Ctx, llvm::StringRef Name, const AttributeCommonInfo &CommonInfo) {
@@ -24272,6 +24895,70 @@ const char *TypeNullableAttr::getSpelling() const {
     return "(No spelling)";
   case 0:
     return "_Nullable";
+  }
+}
+
+
+// TypeNullableResultAttr implementation
+
+TypeNullableResultAttr *TypeNullableResultAttr::CreateImplicit(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) TypeNullableResultAttr(Ctx, CommonInfo);
+  A->setImplicit(true);
+  if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+    A->setAttributeSpellingListIndex(0);
+  return A;
+}
+
+TypeNullableResultAttr *TypeNullableResultAttr::Create(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) TypeNullableResultAttr(Ctx, CommonInfo);
+  if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+    A->setAttributeSpellingListIndex(0);
+  return A;
+}
+
+TypeNullableResultAttr *TypeNullableResultAttr::CreateImplicit(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+  AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  return CreateImplicit(Ctx, I);
+}
+
+TypeNullableResultAttr *TypeNullableResultAttr::Create(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+  AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  return Create(Ctx, I);
+}
+
+TypeNullableResultAttr::TypeNullableResultAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
+             )
+  : TypeAttr(Ctx, CommonInfo, attr::TypeNullableResult, false)
+  {
+}
+
+TypeNullableResultAttr *TypeNullableResultAttr::clone(ASTContext &C) const {
+  auto *A = new (C) TypeNullableResultAttr(C, *this);
+  A->Inherited = Inherited;
+  A->IsPackExpansion = IsPackExpansion;
+  A->setImplicit(Implicit);
+  return A;
+}
+
+void TypeNullableResultAttr::printPretty(raw_ostream &OS, const PrintingPolicy &Policy) const {
+  switch (getAttributeSpellingListIndex()) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    break;
+  case 0 : {
+    OS << " _Nullable_result";
+    break;
+  }
+}
+}
+
+const char *TypeNullableResultAttr::getSpelling() const {
+  switch (getAttributeSpellingListIndex()) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    return "(No spelling)";
+  case 0:
+    return "_Nullable_result";
   }
 }
 
@@ -26591,6 +27278,8 @@ const char *Attr::getSpelling() const {
     return cast<AssertSharedLockAttr>(this)->getSpelling();
   case attr::AssumeAligned:
     return cast<AssumeAlignedAttr>(this)->getSpelling();
+  case attr::Assumption:
+    return cast<AssumptionAttr>(this)->getSpelling();
   case attr::Availability:
     return cast<AvailabilityAttr>(this)->getSpelling();
   case attr::BPFPreserveAccessIndex:
@@ -26645,6 +27334,8 @@ const char *Attr::getSpelling() const {
     return cast<CallableWhenAttr>(this)->getSpelling();
   case attr::Callback:
     return cast<CallbackAttr>(this)->getSpelling();
+  case attr::CalledOnce:
+    return cast<CalledOnceAttr>(this)->getSpelling();
   case attr::Capability:
     return cast<CapabilityAttr>(this)->getSpelling();
   case attr::CapturedRecord:
@@ -26697,6 +27388,10 @@ const char *Attr::getSpelling() const {
     return cast<EmptyBasesAttr>(this)->getSpelling();
   case attr::EnableIf:
     return cast<EnableIfAttr>(this)->getSpelling();
+  case attr::EnforceTCB:
+    return cast<EnforceTCBAttr>(this)->getSpelling();
+  case attr::EnforceTCBLeaf:
+    return cast<EnforceTCBLeafAttr>(this)->getSpelling();
   case attr::EnumExtensibility:
     return cast<EnumExtensibilityAttr>(this)->getSpelling();
   case attr::ExcludeFromExplicitInstantiation:
@@ -26747,6 +27442,8 @@ const char *Attr::getSpelling() const {
     return cast<LTOVisibilityPublicAttr>(this)->getSpelling();
   case attr::LayoutVersion:
     return cast<LayoutVersionAttr>(this)->getSpelling();
+  case attr::Leaf:
+    return cast<LeafAttr>(this)->getSpelling();
   case attr::LifetimeBound:
     return cast<LifetimeBoundAttr>(this)->getSpelling();
   case attr::Likely:
@@ -26995,6 +27692,8 @@ const char *Attr::getSpelling() const {
     return cast<PragmaClangRodataSectionAttr>(this)->getSpelling();
   case attr::PragmaClangTextSection:
     return cast<PragmaClangTextSectionAttr>(this)->getSpelling();
+  case attr::PreferredName:
+    return cast<PreferredNameAttr>(this)->getSpelling();
   case attr::PreserveAll:
     return cast<PreserveAllAttr>(this)->getSpelling();
   case attr::PreserveMost:
@@ -27057,6 +27756,8 @@ const char *Attr::getSpelling() const {
     return cast<StrictFPAttr>(this)->getSpelling();
   case attr::Suppress:
     return cast<SuppressAttr>(this)->getSpelling();
+  case attr::SwiftAsync:
+    return cast<SwiftAsyncAttr>(this)->getSpelling();
   case attr::SwiftAsyncName:
     return cast<SwiftAsyncNameAttr>(this)->getSpelling();
   case attr::SwiftAttr:
@@ -27107,6 +27808,8 @@ const char *Attr::getSpelling() const {
     return cast<TypeNullUnspecifiedAttr>(this)->getSpelling();
   case attr::TypeNullable:
     return cast<TypeNullableAttr>(this)->getSpelling();
+  case attr::TypeNullableResult:
+    return cast<TypeNullableResultAttr>(this)->getSpelling();
   case attr::TypeTagForDatatype:
     return cast<TypeTagForDatatypeAttr>(this)->getSpelling();
   case attr::TypeVisibility:
@@ -27239,6 +27942,8 @@ Attr *Attr::clone(ASTContext &C) const {
     return cast<AssertSharedLockAttr>(this)->clone(C);
   case attr::AssumeAligned:
     return cast<AssumeAlignedAttr>(this)->clone(C);
+  case attr::Assumption:
+    return cast<AssumptionAttr>(this)->clone(C);
   case attr::Availability:
     return cast<AvailabilityAttr>(this)->clone(C);
   case attr::BPFPreserveAccessIndex:
@@ -27293,6 +27998,8 @@ Attr *Attr::clone(ASTContext &C) const {
     return cast<CallableWhenAttr>(this)->clone(C);
   case attr::Callback:
     return cast<CallbackAttr>(this)->clone(C);
+  case attr::CalledOnce:
+    return cast<CalledOnceAttr>(this)->clone(C);
   case attr::Capability:
     return cast<CapabilityAttr>(this)->clone(C);
   case attr::CapturedRecord:
@@ -27345,6 +28052,10 @@ Attr *Attr::clone(ASTContext &C) const {
     return cast<EmptyBasesAttr>(this)->clone(C);
   case attr::EnableIf:
     return cast<EnableIfAttr>(this)->clone(C);
+  case attr::EnforceTCB:
+    return cast<EnforceTCBAttr>(this)->clone(C);
+  case attr::EnforceTCBLeaf:
+    return cast<EnforceTCBLeafAttr>(this)->clone(C);
   case attr::EnumExtensibility:
     return cast<EnumExtensibilityAttr>(this)->clone(C);
   case attr::ExcludeFromExplicitInstantiation:
@@ -27395,6 +28106,8 @@ Attr *Attr::clone(ASTContext &C) const {
     return cast<LTOVisibilityPublicAttr>(this)->clone(C);
   case attr::LayoutVersion:
     return cast<LayoutVersionAttr>(this)->clone(C);
+  case attr::Leaf:
+    return cast<LeafAttr>(this)->clone(C);
   case attr::LifetimeBound:
     return cast<LifetimeBoundAttr>(this)->clone(C);
   case attr::Likely:
@@ -27643,6 +28356,8 @@ Attr *Attr::clone(ASTContext &C) const {
     return cast<PragmaClangRodataSectionAttr>(this)->clone(C);
   case attr::PragmaClangTextSection:
     return cast<PragmaClangTextSectionAttr>(this)->clone(C);
+  case attr::PreferredName:
+    return cast<PreferredNameAttr>(this)->clone(C);
   case attr::PreserveAll:
     return cast<PreserveAllAttr>(this)->clone(C);
   case attr::PreserveMost:
@@ -27705,6 +28420,8 @@ Attr *Attr::clone(ASTContext &C) const {
     return cast<StrictFPAttr>(this)->clone(C);
   case attr::Suppress:
     return cast<SuppressAttr>(this)->clone(C);
+  case attr::SwiftAsync:
+    return cast<SwiftAsyncAttr>(this)->clone(C);
   case attr::SwiftAsyncName:
     return cast<SwiftAsyncNameAttr>(this)->clone(C);
   case attr::SwiftAttr:
@@ -27755,6 +28472,8 @@ Attr *Attr::clone(ASTContext &C) const {
     return cast<TypeNullUnspecifiedAttr>(this)->clone(C);
   case attr::TypeNullable:
     return cast<TypeNullableAttr>(this)->clone(C);
+  case attr::TypeNullableResult:
+    return cast<TypeNullableResultAttr>(this)->clone(C);
   case attr::TypeTagForDatatype:
     return cast<TypeTagForDatatypeAttr>(this)->clone(C);
   case attr::TypeVisibility:
@@ -27887,6 +28606,8 @@ void Attr::printPretty(raw_ostream &OS, const PrintingPolicy &Policy) const {
     return cast<AssertSharedLockAttr>(this)->printPretty(OS, Policy);
   case attr::AssumeAligned:
     return cast<AssumeAlignedAttr>(this)->printPretty(OS, Policy);
+  case attr::Assumption:
+    return cast<AssumptionAttr>(this)->printPretty(OS, Policy);
   case attr::Availability:
     return cast<AvailabilityAttr>(this)->printPretty(OS, Policy);
   case attr::BPFPreserveAccessIndex:
@@ -27941,6 +28662,8 @@ void Attr::printPretty(raw_ostream &OS, const PrintingPolicy &Policy) const {
     return cast<CallableWhenAttr>(this)->printPretty(OS, Policy);
   case attr::Callback:
     return cast<CallbackAttr>(this)->printPretty(OS, Policy);
+  case attr::CalledOnce:
+    return cast<CalledOnceAttr>(this)->printPretty(OS, Policy);
   case attr::Capability:
     return cast<CapabilityAttr>(this)->printPretty(OS, Policy);
   case attr::CapturedRecord:
@@ -27993,6 +28716,10 @@ void Attr::printPretty(raw_ostream &OS, const PrintingPolicy &Policy) const {
     return cast<EmptyBasesAttr>(this)->printPretty(OS, Policy);
   case attr::EnableIf:
     return cast<EnableIfAttr>(this)->printPretty(OS, Policy);
+  case attr::EnforceTCB:
+    return cast<EnforceTCBAttr>(this)->printPretty(OS, Policy);
+  case attr::EnforceTCBLeaf:
+    return cast<EnforceTCBLeafAttr>(this)->printPretty(OS, Policy);
   case attr::EnumExtensibility:
     return cast<EnumExtensibilityAttr>(this)->printPretty(OS, Policy);
   case attr::ExcludeFromExplicitInstantiation:
@@ -28043,6 +28770,8 @@ void Attr::printPretty(raw_ostream &OS, const PrintingPolicy &Policy) const {
     return cast<LTOVisibilityPublicAttr>(this)->printPretty(OS, Policy);
   case attr::LayoutVersion:
     return cast<LayoutVersionAttr>(this)->printPretty(OS, Policy);
+  case attr::Leaf:
+    return cast<LeafAttr>(this)->printPretty(OS, Policy);
   case attr::LifetimeBound:
     return cast<LifetimeBoundAttr>(this)->printPretty(OS, Policy);
   case attr::Likely:
@@ -28291,6 +29020,8 @@ void Attr::printPretty(raw_ostream &OS, const PrintingPolicy &Policy) const {
     return cast<PragmaClangRodataSectionAttr>(this)->printPretty(OS, Policy);
   case attr::PragmaClangTextSection:
     return cast<PragmaClangTextSectionAttr>(this)->printPretty(OS, Policy);
+  case attr::PreferredName:
+    return cast<PreferredNameAttr>(this)->printPretty(OS, Policy);
   case attr::PreserveAll:
     return cast<PreserveAllAttr>(this)->printPretty(OS, Policy);
   case attr::PreserveMost:
@@ -28353,6 +29084,8 @@ void Attr::printPretty(raw_ostream &OS, const PrintingPolicy &Policy) const {
     return cast<StrictFPAttr>(this)->printPretty(OS, Policy);
   case attr::Suppress:
     return cast<SuppressAttr>(this)->printPretty(OS, Policy);
+  case attr::SwiftAsync:
+    return cast<SwiftAsyncAttr>(this)->printPretty(OS, Policy);
   case attr::SwiftAsyncName:
     return cast<SwiftAsyncNameAttr>(this)->printPretty(OS, Policy);
   case attr::SwiftAttr:
@@ -28403,6 +29136,8 @@ void Attr::printPretty(raw_ostream &OS, const PrintingPolicy &Policy) const {
     return cast<TypeNullUnspecifiedAttr>(this)->printPretty(OS, Policy);
   case attr::TypeNullable:
     return cast<TypeNullableAttr>(this)->printPretty(OS, Policy);
+  case attr::TypeNullableResult:
+    return cast<TypeNullableResultAttr>(this)->printPretty(OS, Policy);
   case attr::TypeTagForDatatype:
     return cast<TypeTagForDatatypeAttr>(this)->printPretty(OS, Policy);
   case attr::TypeVisibility:

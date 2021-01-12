@@ -13,7 +13,7 @@ namespace llvm {
 namespace Intrinsic {
 enum X86Intrinsics : unsigned {
 // Enum values for intrinsics
-    x86_3dnow_pavgusb = 7711,                         // llvm.x86.3dnow.pavgusb
+    x86_3dnow_pavgusb = 8496,                         // llvm.x86.3dnow.pavgusb
     x86_3dnow_pf2id,                           // llvm.x86.3dnow.pf2id
     x86_3dnow_pfacc,                           // llvm.x86.3dnow.pfacc
     x86_3dnow_pfadd,                           // llvm.x86.3dnow.pfadd
@@ -1115,15 +1115,19 @@ enum X86Intrinsics : unsigned {
     x86_tbm_bextri_u64,                        // llvm.x86.tbm.bextri.u64
     x86_tdpbf16ps,                             // llvm.x86.tdpbf16ps
     x86_tdpbssd,                               // llvm.x86.tdpbssd
+    x86_tdpbssd_internal,                      // llvm.x86.tdpbssd.internal
     x86_tdpbsud,                               // llvm.x86.tdpbsud
     x86_tdpbusd,                               // llvm.x86.tdpbusd
     x86_tdpbuud,                               // llvm.x86.tdpbuud
     x86_testui,                                // llvm.x86.testui
     x86_tileloadd64,                           // llvm.x86.tileloadd64
+    x86_tileloadd64_internal,                  // llvm.x86.tileloadd64.internal
     x86_tileloaddt164,                         // llvm.x86.tileloaddt164
     x86_tilerelease,                           // llvm.x86.tilerelease
     x86_tilestored64,                          // llvm.x86.tilestored64
+    x86_tilestored64_internal,                 // llvm.x86.tilestored64.internal
     x86_tilezero,                              // llvm.x86.tilezero
+    x86_tilezero_internal,                     // llvm.x86.tilezero.internal
     x86_tpause,                                // llvm.x86.tpause
     x86_umonitor,                              // llvm.x86.umonitor
     x86_umwait,                                // llvm.x86.umwait

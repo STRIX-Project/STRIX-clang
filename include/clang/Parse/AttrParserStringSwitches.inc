@@ -70,6 +70,7 @@
 .Case("interrupt", true)
 .Case("return_typestate", true)
 .Case("set_typestate", true)
+.Case("swift_async", true)
 .Case("swift_error", true)
 .Case("swift_newtype", true)
 .Case("swift_wrapper", true)
@@ -93,6 +94,7 @@
 .Case("iboutletcollection", true)
 .Case("Owner", true)
 .Case("Pointer", true)
+.Case("preferred_name", true)
 .Case("vec_type_hint", true)
 #endif // CLANG_ATTR_TYPE_ARG_LIST
 

@@ -136,11 +136,32 @@ protected:
     this->Size = this->Capacity = 0; // FIXME: Setting Capacity to 0 is suspect.
   }
 
+  /// Return true if V is an internal reference to the given range.
+  bool isReferenceToRange(const void *V, const void *First, const void *Last) const {
+    // Use std::less to avoid UB.
+    std::less<> LessThan;
+    return !LessThan(V, First) && LessThan(V, Last);
+  }
+
+  /// Return true if V is an internal reference to this vector.
+  bool isReferenceToStorage(const void *V) const {
+    return isReferenceToRange(V, this->begin(), this->end());
+  }
+
+  /// Return true if First and Last form a valid (possibly empty) range in this
+  /// vector's storage.
+  bool isRangeInStorage(const void *First, const void *Last) const {
+    // Use std::less to avoid UB.
+    std::less<> LessThan;
+    return !LessThan(First, this->begin()) && !LessThan(Last, First) &&
+           !LessThan(this->end(), Last);
+  }
+
   /// Return true unless Elt will be invalidated by resizing the vector to
   /// NewSize.
   bool isSafeToReferenceAfterResize(const void *Elt, size_t NewSize) {
     // Past the end.
-    if (LLVM_LIKELY(Elt < this->begin() || Elt >= this->end()))
+    if (LLVM_LIKELY(!isReferenceToStorage(Elt)))
       return true;
 
     // Return false if Elt will be destroyed by shrinking.
@@ -460,7 +481,8 @@ public:
     this->Size = 0;
   }
 
-  void resize(size_type N) {
+private:
+  template <bool ForOverwrite> void resizeImpl(size_type N) {
     if (N < this->size()) {
       this->destroy_range(this->begin()+N, this->end());
       this->set_size(N);
@@ -468,10 +490,19 @@ public:
       if (this->capacity() < N)
         this->grow(N);
       for (auto I = this->end(), E = this->begin() + N; I != E; ++I)
-        new (&*I) T();
+        if (ForOverwrite)
+          new (&*I) T;
+        else
+          new (&*I) T();
       this->set_size(N);
     }
   }
+
+public:
+  void resize(size_type N) { resizeImpl<false>(N); }
+
+  /// Like resize, but \ref T is POD, the new values won't be initialized.
+  void resize_for_overwrite(size_type N) { resizeImpl<true>(N); }
 
   void resize(size_type N, const T &NV) {
     if (N == this->size())
@@ -569,8 +600,7 @@ public:
     // Just cast away constness because this is a non-const member function.
     iterator I = const_cast<iterator>(CI);
 
-    assert(I >= this->begin() && "Iterator to erase is out of bounds.");
-    assert(I < this->end() && "Erasing at past-the-end iterator.");
+    assert(this->isReferenceToStorage(CI) && "Iterator to erase is out of bounds.");
 
     iterator N = I;
     // Shift all elts down one.
@@ -585,9 +615,7 @@ public:
     iterator S = const_cast<iterator>(CS);
     iterator E = const_cast<iterator>(CE);
 
-    assert(S >= this->begin() && "Range to erase is out of bounds.");
-    assert(S <= E && "Trying to erase invalid range.");
-    assert(E <= this->end() && "Trying to erase past the end.");
+    assert(this->isRangeInStorage(S, E) && "Range to erase is out of bounds.");
 
     iterator N = S;
     // Shift all elts down.
@@ -605,8 +633,7 @@ private:
       return this->end()-1;
     }
 
-    assert(I >= this->begin() && "Insertion iterator is out of bounds.");
-    assert(I <= this->end() && "Inserting past the end of the vector.");
+    assert(this->isReferenceToStorage(I) && "Insertion iterator is out of bounds.");
 
     // Check that adding an element won't invalidate Elt.
     this->assertSafeToAdd(&Elt);
@@ -625,7 +652,7 @@ private:
     // If we just moved the element we're inserting, be sure to update
     // the reference.
     std::remove_reference_t<ArgType> *EltPtr = &Elt;
-    if (I <= EltPtr && EltPtr < this->end())
+    if (this->isReferenceToRange(EltPtr, I, this->end()))
       ++EltPtr;
 
     *I = ::std::forward<ArgType>(*EltPtr);
@@ -648,8 +675,7 @@ public:
       return this->begin()+InsertElt;
     }
 
-    assert(I >= this->begin() && "Insertion iterator is out of bounds.");
-    assert(I <= this->end() && "Inserting past the end of the vector.");
+    assert(this->isReferenceToStorage(I) && "Insertion iterator is out of bounds.");
 
     // Check that adding NumToInsert elements won't invalidate Elt.
     this->assertSafeToAdd(&Elt, NumToInsert);
@@ -706,8 +732,7 @@ public:
       return this->begin()+InsertElt;
     }
 
-    assert(I >= this->begin() && "Insertion iterator is out of bounds.");
-    assert(I <= this->end() && "Inserting past the end of the vector.");
+    assert(this->isReferenceToStorage(I) && "Insertion iterator is out of bounds.");
 
     // Check that the reserve that follows doesn't invalidate the iterators.
     this->assertSafeToAddRange(From, To);
@@ -1012,8 +1037,16 @@ template <typename T> struct CalculateSmallVectorDefaultInlinedElements {
 /// elements is below that threshold.  This allows normal "small" cases to be
 /// fast without losing generality for large inputs.
 ///
-/// Note that this does not attempt to be exception safe.
+/// \note
+/// In the absence of a well-motivated choice for the number of inlined
+/// elements \p N, it is recommended to use \c SmallVector<T> (that is,
+/// omitting the \p N). This will choose a default number of inlined elements
+/// reasonable for allocation on the stack (for example, trying to keep \c
+/// sizeof(SmallVector<T>) around 64 bytes).
 ///
+/// \warning This does not attempt to be exception safe.
+///
+/// \see https://llvm.org/docs/ProgrammersManual.html#llvm-adt-smallvector-h
 template <typename T,
           unsigned N = CalculateSmallVectorDefaultInlinedElements<T>::value>
 class LLVM_GSL_OWNER SmallVector : public SmallVectorImpl<T>,

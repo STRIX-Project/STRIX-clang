@@ -104,6 +104,10 @@
     const auto *SA = cast<AssertCapabilityAttr>(A); (void)SA;
     OS << " " << A->getSpelling();
   }
+  void VisitAssumptionAttr(const AssumptionAttr *A) {
+    const auto *SA = cast<AssumptionAttr>(A); (void)SA;
+    OS << " \"" << SA->getAssumption() << "\"";
+  }
   void VisitAvailabilityAttr(const AvailabilityAttr *A) {
     const auto *SA = cast<AvailabilityAttr>(A); (void)SA;
     if (SA->getPlatform())
@@ -231,6 +235,14 @@
     const auto *SA = cast<EnableIfAttr>(A); (void)SA;
     OS << " \"" << SA->getMessage() << "\"";
   }
+  void VisitEnforceTCBAttr(const EnforceTCBAttr *A) {
+    const auto *SA = cast<EnforceTCBAttr>(A); (void)SA;
+    OS << " \"" << SA->getTCBName() << "\"";
+  }
+  void VisitEnforceTCBLeafAttr(const EnforceTCBLeafAttr *A) {
+    const auto *SA = cast<EnforceTCBLeafAttr>(A); (void)SA;
+    OS << " \"" << SA->getTCBName() << "\"";
+  }
   void VisitEnumExtensibilityAttr(const EnumExtensibilityAttr *A) {
     const auto *SA = cast<EnumExtensibilityAttr>(A); (void)SA;
     switch(SA->getExtensibility()) {
@@ -332,6 +344,12 @@
       break;
     case LoopHintAttr::Numeric:
       OS << " Numeric";
+      break;
+    case LoopHintAttr::FixedWidth:
+      OS << " FixedWidth";
+      break;
+    case LoopHintAttr::ScalableWidth:
+      OS << " ScalableWidth";
       break;
     case LoopHintAttr::AssumeSafety:
       OS << " AssumeSafety";
@@ -660,6 +678,10 @@
     const auto *SA = cast<PragmaClangTextSectionAttr>(A); (void)SA;
     OS << " \"" << SA->getName() << "\"";
   }
+  void VisitPreferredNameAttr(const PreferredNameAttr *A) {
+    const auto *SA = cast<PreferredNameAttr>(A); (void)SA;
+    OS << " " << SA->getTypedefType().getAsString();
+  }
   void VisitRISCVInterruptAttr(const RISCVInterruptAttr *A) {
     const auto *SA = cast<RISCVInterruptAttr>(A); (void)SA;
     switch(SA->getInterrupt()) {
@@ -737,6 +759,22 @@
     const auto *SA = cast<SuppressAttr>(A); (void)SA;
     for (const auto &Val : SA->diagnosticIdentifiers())
       OS << " " << Val;
+  }
+  void VisitSwiftAsyncAttr(const SwiftAsyncAttr *A) {
+    const auto *SA = cast<SwiftAsyncAttr>(A); (void)SA;
+    switch(SA->getKind()) {
+    case SwiftAsyncAttr::None:
+      OS << " None";
+      break;
+    case SwiftAsyncAttr::SwiftPrivate:
+      OS << " SwiftPrivate";
+      break;
+    case SwiftAsyncAttr::NotSwiftPrivate:
+      OS << " NotSwiftPrivate";
+      break;
+    }
+    if (SA->getCompletionHandlerIndex().isValid())
+      OS << " " << SA->getCompletionHandlerIndex().getSourceIndex();
   }
   void VisitSwiftAsyncNameAttr(const SwiftAsyncNameAttr *A) {
     const auto *SA = cast<SwiftAsyncNameAttr>(A); (void)SA;

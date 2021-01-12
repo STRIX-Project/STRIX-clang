@@ -299,6 +299,15 @@
         return 2;
     break;
   }
+  case AT_Assumption: {
+    if (Name == "assume" && getSyntax() == AttributeCommonInfo::AS_GNU && Scope == "")
+        return 0;
+    if (Name == "assume" && getSyntax() == AttributeCommonInfo::AS_CXX11 && Scope == "clang")
+        return 1;
+    if (Name == "assume" && getSyntax() == AttributeCommonInfo::AS_C2x && Scope == "clang")
+        return 2;
+    break;
+  }
   case AT_Availability: {
     if (Name == "availability" && getSyntax() == AttributeCommonInfo::AS_GNU && Scope == "")
         return 0;
@@ -500,6 +509,15 @@
         return 2;
     break;
   }
+  case AT_CalledOnce: {
+    if (Name == "called_once" && getSyntax() == AttributeCommonInfo::AS_GNU && Scope == "")
+        return 0;
+    if (Name == "called_once" && getSyntax() == AttributeCommonInfo::AS_CXX11 && Scope == "clang")
+        return 1;
+    if (Name == "called_once" && getSyntax() == AttributeCommonInfo::AS_C2x && Scope == "clang")
+        return 2;
+    break;
+  }
   case AT_Capability: {
     if (Name == "capability" && getSyntax() == AttributeCommonInfo::AS_GNU && Scope == "")
         return 0;
@@ -697,6 +715,24 @@
   case AT_EnableIf: {
     if (Name == "enable_if" && getSyntax() == AttributeCommonInfo::AS_GNU && Scope == "")
         return 0;
+    break;
+  }
+  case AT_EnforceTCB: {
+    if (Name == "enforce_tcb" && getSyntax() == AttributeCommonInfo::AS_GNU && Scope == "")
+        return 0;
+    if (Name == "enforce_tcb" && getSyntax() == AttributeCommonInfo::AS_CXX11 && Scope == "clang")
+        return 1;
+    if (Name == "enforce_tcb" && getSyntax() == AttributeCommonInfo::AS_C2x && Scope == "clang")
+        return 2;
+    break;
+  }
+  case AT_EnforceTCBLeaf: {
+    if (Name == "enforce_tcb_leaf" && getSyntax() == AttributeCommonInfo::AS_GNU && Scope == "")
+        return 0;
+    if (Name == "enforce_tcb_leaf" && getSyntax() == AttributeCommonInfo::AS_CXX11 && Scope == "clang")
+        return 1;
+    if (Name == "enforce_tcb_leaf" && getSyntax() == AttributeCommonInfo::AS_C2x && Scope == "clang")
+        return 2;
     break;
   }
   case AT_EnumExtensibility: {
@@ -901,6 +937,15 @@
   case AT_LayoutVersion: {
     if (Name == "layout_version" && getSyntax() == AttributeCommonInfo::AS_Declspec && Scope == "")
         return 0;
+    break;
+  }
+  case AT_Leaf: {
+    if (Name == "leaf" && getSyntax() == AttributeCommonInfo::AS_GNU && Scope == "")
+        return 0;
+    if (Name == "leaf" && getSyntax() == AttributeCommonInfo::AS_CXX11 && Scope == "gnu")
+        return 1;
+    if (Name == "leaf" && getSyntax() == AttributeCommonInfo::AS_C2x && Scope == "gnu")
+        return 2;
     break;
   }
   case AT_LifetimeBound: {
@@ -1948,6 +1993,13 @@
   case AT_PragmaClangTextSection: {
     break;
   }
+  case AT_PreferredName: {
+    if (Name == "preferred_name" && getSyntax() == AttributeCommonInfo::AS_GNU && Scope == "")
+        return 0;
+    if (Name == "preferred_name" && getSyntax() == AttributeCommonInfo::AS_CXX11 && Scope == "clang")
+        return 1;
+    break;
+  }
   case AT_PreserveAll: {
     if (Name == "preserve_all" && getSyntax() == AttributeCommonInfo::AS_GNU && Scope == "")
         return 0;
@@ -2211,6 +2263,15 @@
         return 0;
     break;
   }
+  case AT_SwiftAsync: {
+    if (Name == "swift_async" && getSyntax() == AttributeCommonInfo::AS_GNU && Scope == "")
+        return 0;
+    if (Name == "swift_async" && getSyntax() == AttributeCommonInfo::AS_CXX11 && Scope == "clang")
+        return 1;
+    if (Name == "swift_async" && getSyntax() == AttributeCommonInfo::AS_C2x && Scope == "clang")
+        return 2;
+    break;
+  }
   case AT_SwiftAsyncName: {
     if (Name == "swift_async_name" && getSyntax() == AttributeCommonInfo::AS_GNU && Scope == "")
         return 0;
@@ -2385,6 +2446,11 @@
   }
   case AT_TypeNullable: {
     if (Name == "_Nullable" && getSyntax() == AttributeCommonInfo::AS_Keyword && Scope == "")
+        return 0;
+    break;
+  }
+  case AT_TypeNullableResult: {
+    if (Name == "_Nullable_result" && getSyntax() == AttributeCommonInfo::AS_Keyword && Scope == "")
         return 0;
     break;
   }

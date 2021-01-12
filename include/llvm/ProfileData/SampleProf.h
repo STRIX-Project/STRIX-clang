@@ -54,7 +54,8 @@ enum class sampleprof_error {
   ostream_seek_unsupported,
   compress_failed,
   uncompress_failed,
-  zlib_unavailable
+  zlib_unavailable,
+  hash_mismatch
 };
 
 inline std::error_code make_error_code(sampleprof_error E) {
@@ -120,6 +121,7 @@ enum SecType {
   SecNameTable = 2,
   SecProfileSymbolList = 3,
   SecFuncOffsetTable = 4,
+  SecFuncMetadata = 5,
   // marker for the first type of profile.
   SecFuncProfileFirst = 32,
   SecLBRProfile = SecFuncProfileFirst
@@ -137,6 +139,8 @@ static inline std::string getSecName(SecType Type) {
     return "ProfileSymbolListSection";
   case SecFuncOffsetTable:
     return "FuncOffsetTableSection";
+  case SecFuncMetadata:
+    return "FunctionMetadata";
   case SecLBRProfile:
     return "LBRProfileSection";
   }
@@ -150,6 +154,9 @@ struct SecHdrTableEntry {
   uint64_t Flags;
   uint64_t Offset;
   uint64_t Size;
+  // The index indicating the location of the current entry in
+  // SectionHdrLayout table.
+  uint32_t LayoutIndex;
 };
 
 // Flags common for all sections are defined here. In SecHdrTableEntry::Flags,
@@ -165,7 +172,10 @@ enum class SecCommonFlags : uint32_t {
 // a new check in verifySecFlag.
 enum class SecNameTableFlags : uint32_t {
   SecFlagInValid = 0,
-  SecFlagMD5Name = (1 << 0)
+  SecFlagMD5Name = (1 << 0),
+  // Store MD5 in fixed length instead of ULEB128 so NameTable can be
+  // accessed like an array.
+  SecFlagFixedLengthMD5 = (1 << 1)
 };
 enum class SecProfSummaryFlags : uint32_t {
   SecFlagInValid = 0,
@@ -173,6 +183,11 @@ enum class SecProfSummaryFlags : uint32_t {
   /// The common profile is usually merged from profiles collected
   /// from running other targets.
   SecFlagPartial = (1 << 0)
+};
+
+enum class SecFuncMetadataFlags : uint32_t {
+  SecFlagInvalid = 0,
+  SecFlagIsProbeBased = (1 << 0),
 };
 
 // Verify section specific flag is used for the correct section.
@@ -190,6 +205,9 @@ static inline void verifySecFlag(SecType Type, SecFlagType Flag) {
     break;
   case SecProfSummary:
     IsFlagLegal = std::is_same<SecProfSummaryFlags, SecFlagType>();
+    break;
+  case SecFuncMetadata:
+    IsFlagLegal = std::is_same<SecFuncMetadataFlags, SecFlagType>();
     break;
   default:
     break;
@@ -244,6 +262,10 @@ struct LineLocation {
 
   bool operator==(const LineLocation &O) const {
     return LineOffset == O.LineOffset && Discriminator == O.Discriminator;
+  }
+
+  bool operator!=(const LineLocation &O) const {
+    return LineOffset != O.LineOffset || Discriminator != O.Discriminator;
   }
 
   uint32_t LineOffset;
@@ -495,6 +517,8 @@ public:
                       : sampleprof_error::success;
   }
 
+  void setTotalSamples(uint64_t Num) { TotalSamples = Num; }
+
   sampleprof_error addHeadSamples(uint64_t Num, uint64_t Weight = 1) {
     bool Overflowed;
     TotalHeadSamples =
@@ -530,6 +554,12 @@ public:
       if (ProfileIsCS)
         return 0;
       return std::error_code();
+      // A missing counter for a probe likely means the probe was not executed.
+      // Treat it as a zero count instead of an unknown count to help edge
+      // weight inference.
+      if (FunctionSamples::ProfileIsProbeBased)
+        return 0;
+      return std::error_code();
     } else {
       return ret->second.getSamples();
     }
@@ -544,6 +574,16 @@ public:
     if (ret == BodySamples.end())
       return std::error_code();
     return ret->second.getCallTargets();
+  }
+
+  /// Returns the call target map collected at a given location specified by \p
+  /// CallSite. If the location is not found in profile, return error.
+  ErrorOr<SampleRecord::CallTargetMap>
+  findCallTargetMapAt(const LineLocation &CallSite) const {
+    const auto &Ret = BodySamples.find(CallSite);
+    if (Ret == BodySamples.end())
+      return std::error_code();
+    return Ret->second.getCallTargets();
   }
 
   /// Return the function samples at the given callsite location.
@@ -585,6 +625,11 @@ public:
   /// Return the sample count of the first instruction of the function.
   /// The function can be either a standalone symbol or an inlined function.
   uint64_t getEntrySamples() const {
+    if (FunctionSamples::ProfileIsCS && getHeadSamples()) {
+      // For CS profile, if we already have more accurate head samples
+      // counted by branch sample from caller, use them as entry samples.
+      return getHeadSamples();
+    }
     uint64_t Count = 0;
     // Use either BodySamples or CallsiteSamples which ever has the smaller
     // lineno.
@@ -629,6 +674,21 @@ public:
     Name = Other.getName();
     if (!GUIDToFuncNameMap)
       GUIDToFuncNameMap = Other.GUIDToFuncNameMap;
+
+    if (FunctionHash == 0) {
+      // Set the function hash code for the target profile.
+      FunctionHash = Other.getFunctionHash();
+    } else if (FunctionHash != Other.getFunctionHash()) {
+      // The two profiles coming with different valid hash codes indicates
+      // either:
+      // 1. They are same-named static functions from different compilation
+      // units (without using -unique-internal-linkage-names), or
+      // 2. They are really the same function but from different compilations.
+      // Let's bail out in either case for now, which means one profile is
+      // dropped.
+      return sampleprof_error::hash_mismatch;
+    }
+
     MergeResult(Result, addTotalSamples(Other.getTotalSamples(), Weight));
     MergeResult(Result, addHeadSamples(Other.getHeadSamples(), Weight));
     for (const auto &I : Other.getBodySamples()) {
@@ -680,19 +740,32 @@ public:
   /// Return the function name.
   StringRef getName() const { return Name; }
 
+  /// Return function name with context.
+  StringRef getNameWithContext() const {
+    return FunctionSamples::ProfileIsCS ? Context.getNameWithContext() : Name;
+  }
+
   /// Return the original function name.
   StringRef getFuncName() const { return getFuncName(Name); }
+
+  void setFunctionHash(uint64_t Hash) { FunctionHash = Hash; }
+
+  uint64_t getFunctionHash() const { return FunctionHash; }
 
   /// Return the canonical name for a function, taking into account
   /// suffix elision policy attributes.
   static StringRef getCanonicalFnName(const Function &F) {
-    static const char *knownSuffixes[] = { ".llvm.", ".part." };
     auto AttrName = "sample-profile-suffix-elision-policy";
     auto Attr = F.getFnAttribute(AttrName).getValueAsString();
+    return getCanonicalFnName(F.getName(), Attr);
+  }
+
+  static StringRef getCanonicalFnName(StringRef FnName, StringRef Attr = "") {
+    static const char *knownSuffixes[] = { ".llvm.", ".part." };
     if (Attr == "" || Attr == "all") {
-      return F.getName().split('.').first;
+      return FnName.split('.').first;
     } else if (Attr == "selected") {
-      StringRef Cand(F.getName());
+      StringRef Cand(FnName);
       for (const auto &Suf : knownSuffixes) {
         StringRef Suffix(Suf);
         auto It = Cand.rfind(Suffix);
@@ -704,11 +777,11 @@ public:
       }
       return Cand;
     } else if (Attr == "none") {
-      return F.getName();
+      return FnName;
     } else {
       assert(false && "internal error: unknown suffix elision policy");
     }
-    return F.getName();
+    return FnName;
   }
 
   /// Translate \p Name into its original name.
@@ -723,15 +796,18 @@ public:
       return Name;
 
     assert(GUIDToFuncNameMap && "GUIDToFuncNameMap needs to be popluated first");
-    auto iter = GUIDToFuncNameMap->find(std::stoull(Name.data()));
-    if (iter == GUIDToFuncNameMap->end())
-      return StringRef();
-    return iter->second;
+    return GUIDToFuncNameMap->lookup(std::stoull(Name.data()));
   }
 
   /// Returns the line offset to the start line of the subprogram.
   /// We assume that a single function will not exceed 65535 LOC.
   static unsigned getOffset(const DILocation *DIL);
+
+  /// Returns a unique call site identifier for a given debug location of a call
+  /// instruction. This is wrapper of two scenarios, the probe-based profile and
+  /// regular profile, to hide implementation details from the sample loader and
+  /// the context tracker.
+  static LineLocation getCallSiteIdentifier(const DILocation *DIL);
 
   /// Get the FunctionSamples of the inline instance where DIL originates
   /// from.
@@ -747,6 +823,8 @@ public:
   const FunctionSamples *findFunctionSamples(
       const DILocation *DIL,
       SampleProfileReaderItaniumRemapper *Remapper = nullptr) const;
+
+  static bool ProfileIsProbeBased;
 
   static bool ProfileIsCS;
 
@@ -777,6 +855,9 @@ public:
 private:
   /// Mangled name of the function.
   StringRef Name;
+
+  /// CFG hash value for the function.
+  uint64_t FunctionHash = 0;
 
   /// Calling context for function profile
   mutable SampleContext Context;

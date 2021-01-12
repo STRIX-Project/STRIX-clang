@@ -13,12 +13,30 @@ namespace llvm {
 namespace Intrinsic {
 enum VEIntrinsics : unsigned {
 // Enum values for intrinsics
-    ve_vl_lsv_vvss = 6850,                            // llvm.ve.vl.lsv.vvss
+    ve_vl_andm_MMM = 7211,                            // llvm.ve.vl.andm.MMM
+    ve_vl_andm_mmm,                            // llvm.ve.vl.andm.mmm
+    ve_vl_eqvm_MMM,                            // llvm.ve.vl.eqvm.MMM
+    ve_vl_eqvm_mmm,                            // llvm.ve.vl.eqvm.mmm
+    ve_vl_extract_vm512l,                      // llvm.ve.vl.extract.vm512l
+    ve_vl_extract_vm512u,                      // llvm.ve.vl.extract.vm512u
+    ve_vl_insert_vm512l,                       // llvm.ve.vl.insert.vm512l
+    ve_vl_insert_vm512u,                       // llvm.ve.vl.insert.vm512u
+    ve_vl_lsv_vvss,                            // llvm.ve.vl.lsv.vvss
     ve_vl_lvm_MMss,                            // llvm.ve.vl.lvm.MMss
     ve_vl_lvm_mmss,                            // llvm.ve.vl.lvm.mmss
     ve_vl_lvsd_svs,                            // llvm.ve.vl.lvsd.svs
     ve_vl_lvsl_svs,                            // llvm.ve.vl.lvsl.svs
     ve_vl_lvss_svs,                            // llvm.ve.vl.lvss.svs
+    ve_vl_lzvm_sml,                            // llvm.ve.vl.lzvm.sml
+    ve_vl_negm_MM,                             // llvm.ve.vl.negm.MM
+    ve_vl_negm_mm,                             // llvm.ve.vl.negm.mm
+    ve_vl_nndm_MMM,                            // llvm.ve.vl.nndm.MMM
+    ve_vl_nndm_mmm,                            // llvm.ve.vl.nndm.mmm
+    ve_vl_orm_MMM,                             // llvm.ve.vl.orm.MMM
+    ve_vl_orm_mmm,                             // llvm.ve.vl.orm.mmm
+    ve_vl_pack_f32a,                           // llvm.ve.vl.pack.f32a
+    ve_vl_pack_f32p,                           // llvm.ve.vl.pack.f32p
+    ve_vl_pcvm_sml,                            // llvm.ve.vl.pcvm.sml
     ve_vl_pfchv_ssl,                           // llvm.ve.vl.pfchv.ssl
     ve_vl_pfchvnc_ssl,                         // llvm.ve.vl.pfchvnc.ssl
     ve_vl_pvadds_vsvMvl,                       // llvm.ve.vl.pvadds.vsvMvl
@@ -101,6 +119,176 @@ enum VEIntrinsics : unsigned {
     ve_vl_pvfmin_vvvMvl,                       // llvm.ve.vl.pvfmin.vvvMvl
     ve_vl_pvfmin_vvvl,                         // llvm.ve.vl.pvfmin.vvvl
     ve_vl_pvfmin_vvvvl,                        // llvm.ve.vl.pvfmin.vvvvl
+    ve_vl_pvfmkaf_Ml,                          // llvm.ve.vl.pvfmkaf.Ml
+    ve_vl_pvfmkat_Ml,                          // llvm.ve.vl.pvfmkat.Ml
+    ve_vl_pvfmkseq_MvMl,                       // llvm.ve.vl.pvfmkseq.MvMl
+    ve_vl_pvfmkseq_Mvl,                        // llvm.ve.vl.pvfmkseq.Mvl
+    ve_vl_pvfmkseqnan_MvMl,                    // llvm.ve.vl.pvfmkseqnan.MvMl
+    ve_vl_pvfmkseqnan_Mvl,                     // llvm.ve.vl.pvfmkseqnan.Mvl
+    ve_vl_pvfmksge_MvMl,                       // llvm.ve.vl.pvfmksge.MvMl
+    ve_vl_pvfmksge_Mvl,                        // llvm.ve.vl.pvfmksge.Mvl
+    ve_vl_pvfmksgenan_MvMl,                    // llvm.ve.vl.pvfmksgenan.MvMl
+    ve_vl_pvfmksgenan_Mvl,                     // llvm.ve.vl.pvfmksgenan.Mvl
+    ve_vl_pvfmksgt_MvMl,                       // llvm.ve.vl.pvfmksgt.MvMl
+    ve_vl_pvfmksgt_Mvl,                        // llvm.ve.vl.pvfmksgt.Mvl
+    ve_vl_pvfmksgtnan_MvMl,                    // llvm.ve.vl.pvfmksgtnan.MvMl
+    ve_vl_pvfmksgtnan_Mvl,                     // llvm.ve.vl.pvfmksgtnan.Mvl
+    ve_vl_pvfmksle_MvMl,                       // llvm.ve.vl.pvfmksle.MvMl
+    ve_vl_pvfmksle_Mvl,                        // llvm.ve.vl.pvfmksle.Mvl
+    ve_vl_pvfmkslenan_MvMl,                    // llvm.ve.vl.pvfmkslenan.MvMl
+    ve_vl_pvfmkslenan_Mvl,                     // llvm.ve.vl.pvfmkslenan.Mvl
+    ve_vl_pvfmksloeq_mvl,                      // llvm.ve.vl.pvfmksloeq.mvl
+    ve_vl_pvfmksloeq_mvml,                     // llvm.ve.vl.pvfmksloeq.mvml
+    ve_vl_pvfmksloeqnan_mvl,                   // llvm.ve.vl.pvfmksloeqnan.mvl
+    ve_vl_pvfmksloeqnan_mvml,                  // llvm.ve.vl.pvfmksloeqnan.mvml
+    ve_vl_pvfmksloge_mvl,                      // llvm.ve.vl.pvfmksloge.mvl
+    ve_vl_pvfmksloge_mvml,                     // llvm.ve.vl.pvfmksloge.mvml
+    ve_vl_pvfmkslogenan_mvl,                   // llvm.ve.vl.pvfmkslogenan.mvl
+    ve_vl_pvfmkslogenan_mvml,                  // llvm.ve.vl.pvfmkslogenan.mvml
+    ve_vl_pvfmkslogt_mvl,                      // llvm.ve.vl.pvfmkslogt.mvl
+    ve_vl_pvfmkslogt_mvml,                     // llvm.ve.vl.pvfmkslogt.mvml
+    ve_vl_pvfmkslogtnan_mvl,                   // llvm.ve.vl.pvfmkslogtnan.mvl
+    ve_vl_pvfmkslogtnan_mvml,                  // llvm.ve.vl.pvfmkslogtnan.mvml
+    ve_vl_pvfmkslole_mvl,                      // llvm.ve.vl.pvfmkslole.mvl
+    ve_vl_pvfmkslole_mvml,                     // llvm.ve.vl.pvfmkslole.mvml
+    ve_vl_pvfmkslolenan_mvl,                   // llvm.ve.vl.pvfmkslolenan.mvl
+    ve_vl_pvfmkslolenan_mvml,                  // llvm.ve.vl.pvfmkslolenan.mvml
+    ve_vl_pvfmkslolt_mvl,                      // llvm.ve.vl.pvfmkslolt.mvl
+    ve_vl_pvfmkslolt_mvml,                     // llvm.ve.vl.pvfmkslolt.mvml
+    ve_vl_pvfmksloltnan_mvl,                   // llvm.ve.vl.pvfmksloltnan.mvl
+    ve_vl_pvfmksloltnan_mvml,                  // llvm.ve.vl.pvfmksloltnan.mvml
+    ve_vl_pvfmkslonan_mvl,                     // llvm.ve.vl.pvfmkslonan.mvl
+    ve_vl_pvfmkslonan_mvml,                    // llvm.ve.vl.pvfmkslonan.mvml
+    ve_vl_pvfmkslone_mvl,                      // llvm.ve.vl.pvfmkslone.mvl
+    ve_vl_pvfmkslone_mvml,                     // llvm.ve.vl.pvfmkslone.mvml
+    ve_vl_pvfmkslonenan_mvl,                   // llvm.ve.vl.pvfmkslonenan.mvl
+    ve_vl_pvfmkslonenan_mvml,                  // llvm.ve.vl.pvfmkslonenan.mvml
+    ve_vl_pvfmkslonum_mvl,                     // llvm.ve.vl.pvfmkslonum.mvl
+    ve_vl_pvfmkslonum_mvml,                    // llvm.ve.vl.pvfmkslonum.mvml
+    ve_vl_pvfmkslt_MvMl,                       // llvm.ve.vl.pvfmkslt.MvMl
+    ve_vl_pvfmkslt_Mvl,                        // llvm.ve.vl.pvfmkslt.Mvl
+    ve_vl_pvfmksltnan_MvMl,                    // llvm.ve.vl.pvfmksltnan.MvMl
+    ve_vl_pvfmksltnan_Mvl,                     // llvm.ve.vl.pvfmksltnan.Mvl
+    ve_vl_pvfmksnan_MvMl,                      // llvm.ve.vl.pvfmksnan.MvMl
+    ve_vl_pvfmksnan_Mvl,                       // llvm.ve.vl.pvfmksnan.Mvl
+    ve_vl_pvfmksne_MvMl,                       // llvm.ve.vl.pvfmksne.MvMl
+    ve_vl_pvfmksne_Mvl,                        // llvm.ve.vl.pvfmksne.Mvl
+    ve_vl_pvfmksnenan_MvMl,                    // llvm.ve.vl.pvfmksnenan.MvMl
+    ve_vl_pvfmksnenan_Mvl,                     // llvm.ve.vl.pvfmksnenan.Mvl
+    ve_vl_pvfmksnum_MvMl,                      // llvm.ve.vl.pvfmksnum.MvMl
+    ve_vl_pvfmksnum_Mvl,                       // llvm.ve.vl.pvfmksnum.Mvl
+    ve_vl_pvfmksupeq_mvl,                      // llvm.ve.vl.pvfmksupeq.mvl
+    ve_vl_pvfmksupeq_mvml,                     // llvm.ve.vl.pvfmksupeq.mvml
+    ve_vl_pvfmksupeqnan_mvl,                   // llvm.ve.vl.pvfmksupeqnan.mvl
+    ve_vl_pvfmksupeqnan_mvml,                  // llvm.ve.vl.pvfmksupeqnan.mvml
+    ve_vl_pvfmksupge_mvl,                      // llvm.ve.vl.pvfmksupge.mvl
+    ve_vl_pvfmksupge_mvml,                     // llvm.ve.vl.pvfmksupge.mvml
+    ve_vl_pvfmksupgenan_mvl,                   // llvm.ve.vl.pvfmksupgenan.mvl
+    ve_vl_pvfmksupgenan_mvml,                  // llvm.ve.vl.pvfmksupgenan.mvml
+    ve_vl_pvfmksupgt_mvl,                      // llvm.ve.vl.pvfmksupgt.mvl
+    ve_vl_pvfmksupgt_mvml,                     // llvm.ve.vl.pvfmksupgt.mvml
+    ve_vl_pvfmksupgtnan_mvl,                   // llvm.ve.vl.pvfmksupgtnan.mvl
+    ve_vl_pvfmksupgtnan_mvml,                  // llvm.ve.vl.pvfmksupgtnan.mvml
+    ve_vl_pvfmksuple_mvl,                      // llvm.ve.vl.pvfmksuple.mvl
+    ve_vl_pvfmksuple_mvml,                     // llvm.ve.vl.pvfmksuple.mvml
+    ve_vl_pvfmksuplenan_mvl,                   // llvm.ve.vl.pvfmksuplenan.mvl
+    ve_vl_pvfmksuplenan_mvml,                  // llvm.ve.vl.pvfmksuplenan.mvml
+    ve_vl_pvfmksuplt_mvl,                      // llvm.ve.vl.pvfmksuplt.mvl
+    ve_vl_pvfmksuplt_mvml,                     // llvm.ve.vl.pvfmksuplt.mvml
+    ve_vl_pvfmksupltnan_mvl,                   // llvm.ve.vl.pvfmksupltnan.mvl
+    ve_vl_pvfmksupltnan_mvml,                  // llvm.ve.vl.pvfmksupltnan.mvml
+    ve_vl_pvfmksupnan_mvl,                     // llvm.ve.vl.pvfmksupnan.mvl
+    ve_vl_pvfmksupnan_mvml,                    // llvm.ve.vl.pvfmksupnan.mvml
+    ve_vl_pvfmksupne_mvl,                      // llvm.ve.vl.pvfmksupne.mvl
+    ve_vl_pvfmksupne_mvml,                     // llvm.ve.vl.pvfmksupne.mvml
+    ve_vl_pvfmksupnenan_mvl,                   // llvm.ve.vl.pvfmksupnenan.mvl
+    ve_vl_pvfmksupnenan_mvml,                  // llvm.ve.vl.pvfmksupnenan.mvml
+    ve_vl_pvfmksupnum_mvl,                     // llvm.ve.vl.pvfmksupnum.mvl
+    ve_vl_pvfmksupnum_mvml,                    // llvm.ve.vl.pvfmksupnum.mvml
+    ve_vl_pvfmkweq_MvMl,                       // llvm.ve.vl.pvfmkweq.MvMl
+    ve_vl_pvfmkweq_Mvl,                        // llvm.ve.vl.pvfmkweq.Mvl
+    ve_vl_pvfmkweqnan_MvMl,                    // llvm.ve.vl.pvfmkweqnan.MvMl
+    ve_vl_pvfmkweqnan_Mvl,                     // llvm.ve.vl.pvfmkweqnan.Mvl
+    ve_vl_pvfmkwge_MvMl,                       // llvm.ve.vl.pvfmkwge.MvMl
+    ve_vl_pvfmkwge_Mvl,                        // llvm.ve.vl.pvfmkwge.Mvl
+    ve_vl_pvfmkwgenan_MvMl,                    // llvm.ve.vl.pvfmkwgenan.MvMl
+    ve_vl_pvfmkwgenan_Mvl,                     // llvm.ve.vl.pvfmkwgenan.Mvl
+    ve_vl_pvfmkwgt_MvMl,                       // llvm.ve.vl.pvfmkwgt.MvMl
+    ve_vl_pvfmkwgt_Mvl,                        // llvm.ve.vl.pvfmkwgt.Mvl
+    ve_vl_pvfmkwgtnan_MvMl,                    // llvm.ve.vl.pvfmkwgtnan.MvMl
+    ve_vl_pvfmkwgtnan_Mvl,                     // llvm.ve.vl.pvfmkwgtnan.Mvl
+    ve_vl_pvfmkwle_MvMl,                       // llvm.ve.vl.pvfmkwle.MvMl
+    ve_vl_pvfmkwle_Mvl,                        // llvm.ve.vl.pvfmkwle.Mvl
+    ve_vl_pvfmkwlenan_MvMl,                    // llvm.ve.vl.pvfmkwlenan.MvMl
+    ve_vl_pvfmkwlenan_Mvl,                     // llvm.ve.vl.pvfmkwlenan.Mvl
+    ve_vl_pvfmkwloeq_mvl,                      // llvm.ve.vl.pvfmkwloeq.mvl
+    ve_vl_pvfmkwloeq_mvml,                     // llvm.ve.vl.pvfmkwloeq.mvml
+    ve_vl_pvfmkwloeqnan_mvl,                   // llvm.ve.vl.pvfmkwloeqnan.mvl
+    ve_vl_pvfmkwloeqnan_mvml,                  // llvm.ve.vl.pvfmkwloeqnan.mvml
+    ve_vl_pvfmkwloge_mvl,                      // llvm.ve.vl.pvfmkwloge.mvl
+    ve_vl_pvfmkwloge_mvml,                     // llvm.ve.vl.pvfmkwloge.mvml
+    ve_vl_pvfmkwlogenan_mvl,                   // llvm.ve.vl.pvfmkwlogenan.mvl
+    ve_vl_pvfmkwlogenan_mvml,                  // llvm.ve.vl.pvfmkwlogenan.mvml
+    ve_vl_pvfmkwlogt_mvl,                      // llvm.ve.vl.pvfmkwlogt.mvl
+    ve_vl_pvfmkwlogt_mvml,                     // llvm.ve.vl.pvfmkwlogt.mvml
+    ve_vl_pvfmkwlogtnan_mvl,                   // llvm.ve.vl.pvfmkwlogtnan.mvl
+    ve_vl_pvfmkwlogtnan_mvml,                  // llvm.ve.vl.pvfmkwlogtnan.mvml
+    ve_vl_pvfmkwlole_mvl,                      // llvm.ve.vl.pvfmkwlole.mvl
+    ve_vl_pvfmkwlole_mvml,                     // llvm.ve.vl.pvfmkwlole.mvml
+    ve_vl_pvfmkwlolenan_mvl,                   // llvm.ve.vl.pvfmkwlolenan.mvl
+    ve_vl_pvfmkwlolenan_mvml,                  // llvm.ve.vl.pvfmkwlolenan.mvml
+    ve_vl_pvfmkwlolt_mvl,                      // llvm.ve.vl.pvfmkwlolt.mvl
+    ve_vl_pvfmkwlolt_mvml,                     // llvm.ve.vl.pvfmkwlolt.mvml
+    ve_vl_pvfmkwloltnan_mvl,                   // llvm.ve.vl.pvfmkwloltnan.mvl
+    ve_vl_pvfmkwloltnan_mvml,                  // llvm.ve.vl.pvfmkwloltnan.mvml
+    ve_vl_pvfmkwlonan_mvl,                     // llvm.ve.vl.pvfmkwlonan.mvl
+    ve_vl_pvfmkwlonan_mvml,                    // llvm.ve.vl.pvfmkwlonan.mvml
+    ve_vl_pvfmkwlone_mvl,                      // llvm.ve.vl.pvfmkwlone.mvl
+    ve_vl_pvfmkwlone_mvml,                     // llvm.ve.vl.pvfmkwlone.mvml
+    ve_vl_pvfmkwlonenan_mvl,                   // llvm.ve.vl.pvfmkwlonenan.mvl
+    ve_vl_pvfmkwlonenan_mvml,                  // llvm.ve.vl.pvfmkwlonenan.mvml
+    ve_vl_pvfmkwlonum_mvl,                     // llvm.ve.vl.pvfmkwlonum.mvl
+    ve_vl_pvfmkwlonum_mvml,                    // llvm.ve.vl.pvfmkwlonum.mvml
+    ve_vl_pvfmkwlt_MvMl,                       // llvm.ve.vl.pvfmkwlt.MvMl
+    ve_vl_pvfmkwlt_Mvl,                        // llvm.ve.vl.pvfmkwlt.Mvl
+    ve_vl_pvfmkwltnan_MvMl,                    // llvm.ve.vl.pvfmkwltnan.MvMl
+    ve_vl_pvfmkwltnan_Mvl,                     // llvm.ve.vl.pvfmkwltnan.Mvl
+    ve_vl_pvfmkwnan_MvMl,                      // llvm.ve.vl.pvfmkwnan.MvMl
+    ve_vl_pvfmkwnan_Mvl,                       // llvm.ve.vl.pvfmkwnan.Mvl
+    ve_vl_pvfmkwne_MvMl,                       // llvm.ve.vl.pvfmkwne.MvMl
+    ve_vl_pvfmkwne_Mvl,                        // llvm.ve.vl.pvfmkwne.Mvl
+    ve_vl_pvfmkwnenan_MvMl,                    // llvm.ve.vl.pvfmkwnenan.MvMl
+    ve_vl_pvfmkwnenan_Mvl,                     // llvm.ve.vl.pvfmkwnenan.Mvl
+    ve_vl_pvfmkwnum_MvMl,                      // llvm.ve.vl.pvfmkwnum.MvMl
+    ve_vl_pvfmkwnum_Mvl,                       // llvm.ve.vl.pvfmkwnum.Mvl
+    ve_vl_pvfmkwupeq_mvl,                      // llvm.ve.vl.pvfmkwupeq.mvl
+    ve_vl_pvfmkwupeq_mvml,                     // llvm.ve.vl.pvfmkwupeq.mvml
+    ve_vl_pvfmkwupeqnan_mvl,                   // llvm.ve.vl.pvfmkwupeqnan.mvl
+    ve_vl_pvfmkwupeqnan_mvml,                  // llvm.ve.vl.pvfmkwupeqnan.mvml
+    ve_vl_pvfmkwupge_mvl,                      // llvm.ve.vl.pvfmkwupge.mvl
+    ve_vl_pvfmkwupge_mvml,                     // llvm.ve.vl.pvfmkwupge.mvml
+    ve_vl_pvfmkwupgenan_mvl,                   // llvm.ve.vl.pvfmkwupgenan.mvl
+    ve_vl_pvfmkwupgenan_mvml,                  // llvm.ve.vl.pvfmkwupgenan.mvml
+    ve_vl_pvfmkwupgt_mvl,                      // llvm.ve.vl.pvfmkwupgt.mvl
+    ve_vl_pvfmkwupgt_mvml,                     // llvm.ve.vl.pvfmkwupgt.mvml
+    ve_vl_pvfmkwupgtnan_mvl,                   // llvm.ve.vl.pvfmkwupgtnan.mvl
+    ve_vl_pvfmkwupgtnan_mvml,                  // llvm.ve.vl.pvfmkwupgtnan.mvml
+    ve_vl_pvfmkwuple_mvl,                      // llvm.ve.vl.pvfmkwuple.mvl
+    ve_vl_pvfmkwuple_mvml,                     // llvm.ve.vl.pvfmkwuple.mvml
+    ve_vl_pvfmkwuplenan_mvl,                   // llvm.ve.vl.pvfmkwuplenan.mvl
+    ve_vl_pvfmkwuplenan_mvml,                  // llvm.ve.vl.pvfmkwuplenan.mvml
+    ve_vl_pvfmkwuplt_mvl,                      // llvm.ve.vl.pvfmkwuplt.mvl
+    ve_vl_pvfmkwuplt_mvml,                     // llvm.ve.vl.pvfmkwuplt.mvml
+    ve_vl_pvfmkwupltnan_mvl,                   // llvm.ve.vl.pvfmkwupltnan.mvl
+    ve_vl_pvfmkwupltnan_mvml,                  // llvm.ve.vl.pvfmkwupltnan.mvml
+    ve_vl_pvfmkwupnan_mvl,                     // llvm.ve.vl.pvfmkwupnan.mvl
+    ve_vl_pvfmkwupnan_mvml,                    // llvm.ve.vl.pvfmkwupnan.mvml
+    ve_vl_pvfmkwupne_mvl,                      // llvm.ve.vl.pvfmkwupne.mvl
+    ve_vl_pvfmkwupne_mvml,                     // llvm.ve.vl.pvfmkwupne.mvml
+    ve_vl_pvfmkwupnenan_mvl,                   // llvm.ve.vl.pvfmkwupnenan.mvl
+    ve_vl_pvfmkwupnenan_mvml,                  // llvm.ve.vl.pvfmkwupnenan.mvml
+    ve_vl_pvfmkwupnum_mvl,                     // llvm.ve.vl.pvfmkwupnum.mvl
+    ve_vl_pvfmkwupnum_mvml,                    // llvm.ve.vl.pvfmkwupnum.mvml
     ve_vl_pvfmsb_vsvvMvl,                      // llvm.ve.vl.pvfmsb.vsvvMvl
     ve_vl_pvfmsb_vsvvl,                        // llvm.ve.vl.pvfmsb.vsvvl
     ve_vl_pvfmsb_vsvvvl,                       // llvm.ve.vl.pvfmsb.vsvvvl
@@ -214,6 +402,8 @@ enum VEIntrinsics : unsigned {
     ve_vl_pvxor_vvvvl,                         // llvm.ve.vl.pvxor.vvvvl
     ve_vl_svm_sMs,                             // llvm.ve.vl.svm.sMs
     ve_vl_svm_sms,                             // llvm.ve.vl.svm.sms
+    ve_vl_svob,                                // llvm.ve.vl.svob
+    ve_vl_tovm_sml,                            // llvm.ve.vl.tovm.sml
     ve_vl_vaddsl_vsvl,                         // llvm.ve.vl.vaddsl.vsvl
     ve_vl_vaddsl_vsvmvl,                       // llvm.ve.vl.vaddsl.vsvmvl
     ve_vl_vaddsl_vsvvl,                        // llvm.ve.vl.vaddsl.vsvvl
@@ -292,6 +482,7 @@ enum VEIntrinsics : unsigned {
     ve_vl_vcmpuw_vvvl,                         // llvm.ve.vl.vcmpuw.vvvl
     ve_vl_vcmpuw_vvvmvl,                       // llvm.ve.vl.vcmpuw.vvvmvl
     ve_vl_vcmpuw_vvvvl,                        // llvm.ve.vl.vcmpuw.vvvvl
+    ve_vl_vcp_vvmvl,                           // llvm.ve.vl.vcp.vvmvl
     ve_vl_vcvtdl_vvl,                          // llvm.ve.vl.vcvtdl.vvl
     ve_vl_vcvtdl_vvvl,                         // llvm.ve.vl.vcvtdl.vvvl
     ve_vl_vcvtds_vvl,                          // llvm.ve.vl.vcvtds.vvl
@@ -383,6 +574,7 @@ enum VEIntrinsics : unsigned {
     ve_vl_veqv_vvvl,                           // llvm.ve.vl.veqv.vvvl
     ve_vl_veqv_vvvmvl,                         // llvm.ve.vl.veqv.vvvmvl
     ve_vl_veqv_vvvvl,                          // llvm.ve.vl.veqv.vvvvl
+    ve_vl_vex_vvmvl,                           // llvm.ve.vl.vex.vvmvl
     ve_vl_vfaddd_vsvl,                         // llvm.ve.vl.vfaddd.vsvl
     ve_vl_vfaddd_vsvmvl,                       // llvm.ve.vl.vfaddd.vsvmvl
     ve_vl_vfaddd_vsvvl,                        // llvm.ve.vl.vfaddd.vsvvl
@@ -461,6 +653,120 @@ enum VEIntrinsics : unsigned {
     ve_vl_vfmins_vvvl,                         // llvm.ve.vl.vfmins.vvvl
     ve_vl_vfmins_vvvmvl,                       // llvm.ve.vl.vfmins.vvvmvl
     ve_vl_vfmins_vvvvl,                        // llvm.ve.vl.vfmins.vvvvl
+    ve_vl_vfmkdeq_mvl,                         // llvm.ve.vl.vfmkdeq.mvl
+    ve_vl_vfmkdeq_mvml,                        // llvm.ve.vl.vfmkdeq.mvml
+    ve_vl_vfmkdeqnan_mvl,                      // llvm.ve.vl.vfmkdeqnan.mvl
+    ve_vl_vfmkdeqnan_mvml,                     // llvm.ve.vl.vfmkdeqnan.mvml
+    ve_vl_vfmkdge_mvl,                         // llvm.ve.vl.vfmkdge.mvl
+    ve_vl_vfmkdge_mvml,                        // llvm.ve.vl.vfmkdge.mvml
+    ve_vl_vfmkdgenan_mvl,                      // llvm.ve.vl.vfmkdgenan.mvl
+    ve_vl_vfmkdgenan_mvml,                     // llvm.ve.vl.vfmkdgenan.mvml
+    ve_vl_vfmkdgt_mvl,                         // llvm.ve.vl.vfmkdgt.mvl
+    ve_vl_vfmkdgt_mvml,                        // llvm.ve.vl.vfmkdgt.mvml
+    ve_vl_vfmkdgtnan_mvl,                      // llvm.ve.vl.vfmkdgtnan.mvl
+    ve_vl_vfmkdgtnan_mvml,                     // llvm.ve.vl.vfmkdgtnan.mvml
+    ve_vl_vfmkdle_mvl,                         // llvm.ve.vl.vfmkdle.mvl
+    ve_vl_vfmkdle_mvml,                        // llvm.ve.vl.vfmkdle.mvml
+    ve_vl_vfmkdlenan_mvl,                      // llvm.ve.vl.vfmkdlenan.mvl
+    ve_vl_vfmkdlenan_mvml,                     // llvm.ve.vl.vfmkdlenan.mvml
+    ve_vl_vfmkdlt_mvl,                         // llvm.ve.vl.vfmkdlt.mvl
+    ve_vl_vfmkdlt_mvml,                        // llvm.ve.vl.vfmkdlt.mvml
+    ve_vl_vfmkdltnan_mvl,                      // llvm.ve.vl.vfmkdltnan.mvl
+    ve_vl_vfmkdltnan_mvml,                     // llvm.ve.vl.vfmkdltnan.mvml
+    ve_vl_vfmkdnan_mvl,                        // llvm.ve.vl.vfmkdnan.mvl
+    ve_vl_vfmkdnan_mvml,                       // llvm.ve.vl.vfmkdnan.mvml
+    ve_vl_vfmkdne_mvl,                         // llvm.ve.vl.vfmkdne.mvl
+    ve_vl_vfmkdne_mvml,                        // llvm.ve.vl.vfmkdne.mvml
+    ve_vl_vfmkdnenan_mvl,                      // llvm.ve.vl.vfmkdnenan.mvl
+    ve_vl_vfmkdnenan_mvml,                     // llvm.ve.vl.vfmkdnenan.mvml
+    ve_vl_vfmkdnum_mvl,                        // llvm.ve.vl.vfmkdnum.mvl
+    ve_vl_vfmkdnum_mvml,                       // llvm.ve.vl.vfmkdnum.mvml
+    ve_vl_vfmklaf_ml,                          // llvm.ve.vl.vfmklaf.ml
+    ve_vl_vfmklat_ml,                          // llvm.ve.vl.vfmklat.ml
+    ve_vl_vfmkleq_mvl,                         // llvm.ve.vl.vfmkleq.mvl
+    ve_vl_vfmkleq_mvml,                        // llvm.ve.vl.vfmkleq.mvml
+    ve_vl_vfmkleqnan_mvl,                      // llvm.ve.vl.vfmkleqnan.mvl
+    ve_vl_vfmkleqnan_mvml,                     // llvm.ve.vl.vfmkleqnan.mvml
+    ve_vl_vfmklge_mvl,                         // llvm.ve.vl.vfmklge.mvl
+    ve_vl_vfmklge_mvml,                        // llvm.ve.vl.vfmklge.mvml
+    ve_vl_vfmklgenan_mvl,                      // llvm.ve.vl.vfmklgenan.mvl
+    ve_vl_vfmklgenan_mvml,                     // llvm.ve.vl.vfmklgenan.mvml
+    ve_vl_vfmklgt_mvl,                         // llvm.ve.vl.vfmklgt.mvl
+    ve_vl_vfmklgt_mvml,                        // llvm.ve.vl.vfmklgt.mvml
+    ve_vl_vfmklgtnan_mvl,                      // llvm.ve.vl.vfmklgtnan.mvl
+    ve_vl_vfmklgtnan_mvml,                     // llvm.ve.vl.vfmklgtnan.mvml
+    ve_vl_vfmklle_mvl,                         // llvm.ve.vl.vfmklle.mvl
+    ve_vl_vfmklle_mvml,                        // llvm.ve.vl.vfmklle.mvml
+    ve_vl_vfmkllenan_mvl,                      // llvm.ve.vl.vfmkllenan.mvl
+    ve_vl_vfmkllenan_mvml,                     // llvm.ve.vl.vfmkllenan.mvml
+    ve_vl_vfmkllt_mvl,                         // llvm.ve.vl.vfmkllt.mvl
+    ve_vl_vfmkllt_mvml,                        // llvm.ve.vl.vfmkllt.mvml
+    ve_vl_vfmklltnan_mvl,                      // llvm.ve.vl.vfmklltnan.mvl
+    ve_vl_vfmklltnan_mvml,                     // llvm.ve.vl.vfmklltnan.mvml
+    ve_vl_vfmklnan_mvl,                        // llvm.ve.vl.vfmklnan.mvl
+    ve_vl_vfmklnan_mvml,                       // llvm.ve.vl.vfmklnan.mvml
+    ve_vl_vfmklne_mvl,                         // llvm.ve.vl.vfmklne.mvl
+    ve_vl_vfmklne_mvml,                        // llvm.ve.vl.vfmklne.mvml
+    ve_vl_vfmklnenan_mvl,                      // llvm.ve.vl.vfmklnenan.mvl
+    ve_vl_vfmklnenan_mvml,                     // llvm.ve.vl.vfmklnenan.mvml
+    ve_vl_vfmklnum_mvl,                        // llvm.ve.vl.vfmklnum.mvl
+    ve_vl_vfmklnum_mvml,                       // llvm.ve.vl.vfmklnum.mvml
+    ve_vl_vfmkseq_mvl,                         // llvm.ve.vl.vfmkseq.mvl
+    ve_vl_vfmkseq_mvml,                        // llvm.ve.vl.vfmkseq.mvml
+    ve_vl_vfmkseqnan_mvl,                      // llvm.ve.vl.vfmkseqnan.mvl
+    ve_vl_vfmkseqnan_mvml,                     // llvm.ve.vl.vfmkseqnan.mvml
+    ve_vl_vfmksge_mvl,                         // llvm.ve.vl.vfmksge.mvl
+    ve_vl_vfmksge_mvml,                        // llvm.ve.vl.vfmksge.mvml
+    ve_vl_vfmksgenan_mvl,                      // llvm.ve.vl.vfmksgenan.mvl
+    ve_vl_vfmksgenan_mvml,                     // llvm.ve.vl.vfmksgenan.mvml
+    ve_vl_vfmksgt_mvl,                         // llvm.ve.vl.vfmksgt.mvl
+    ve_vl_vfmksgt_mvml,                        // llvm.ve.vl.vfmksgt.mvml
+    ve_vl_vfmksgtnan_mvl,                      // llvm.ve.vl.vfmksgtnan.mvl
+    ve_vl_vfmksgtnan_mvml,                     // llvm.ve.vl.vfmksgtnan.mvml
+    ve_vl_vfmksle_mvl,                         // llvm.ve.vl.vfmksle.mvl
+    ve_vl_vfmksle_mvml,                        // llvm.ve.vl.vfmksle.mvml
+    ve_vl_vfmkslenan_mvl,                      // llvm.ve.vl.vfmkslenan.mvl
+    ve_vl_vfmkslenan_mvml,                     // llvm.ve.vl.vfmkslenan.mvml
+    ve_vl_vfmkslt_mvl,                         // llvm.ve.vl.vfmkslt.mvl
+    ve_vl_vfmkslt_mvml,                        // llvm.ve.vl.vfmkslt.mvml
+    ve_vl_vfmksltnan_mvl,                      // llvm.ve.vl.vfmksltnan.mvl
+    ve_vl_vfmksltnan_mvml,                     // llvm.ve.vl.vfmksltnan.mvml
+    ve_vl_vfmksnan_mvl,                        // llvm.ve.vl.vfmksnan.mvl
+    ve_vl_vfmksnan_mvml,                       // llvm.ve.vl.vfmksnan.mvml
+    ve_vl_vfmksne_mvl,                         // llvm.ve.vl.vfmksne.mvl
+    ve_vl_vfmksne_mvml,                        // llvm.ve.vl.vfmksne.mvml
+    ve_vl_vfmksnenan_mvl,                      // llvm.ve.vl.vfmksnenan.mvl
+    ve_vl_vfmksnenan_mvml,                     // llvm.ve.vl.vfmksnenan.mvml
+    ve_vl_vfmksnum_mvl,                        // llvm.ve.vl.vfmksnum.mvl
+    ve_vl_vfmksnum_mvml,                       // llvm.ve.vl.vfmksnum.mvml
+    ve_vl_vfmkweq_mvl,                         // llvm.ve.vl.vfmkweq.mvl
+    ve_vl_vfmkweq_mvml,                        // llvm.ve.vl.vfmkweq.mvml
+    ve_vl_vfmkweqnan_mvl,                      // llvm.ve.vl.vfmkweqnan.mvl
+    ve_vl_vfmkweqnan_mvml,                     // llvm.ve.vl.vfmkweqnan.mvml
+    ve_vl_vfmkwge_mvl,                         // llvm.ve.vl.vfmkwge.mvl
+    ve_vl_vfmkwge_mvml,                        // llvm.ve.vl.vfmkwge.mvml
+    ve_vl_vfmkwgenan_mvl,                      // llvm.ve.vl.vfmkwgenan.mvl
+    ve_vl_vfmkwgenan_mvml,                     // llvm.ve.vl.vfmkwgenan.mvml
+    ve_vl_vfmkwgt_mvl,                         // llvm.ve.vl.vfmkwgt.mvl
+    ve_vl_vfmkwgt_mvml,                        // llvm.ve.vl.vfmkwgt.mvml
+    ve_vl_vfmkwgtnan_mvl,                      // llvm.ve.vl.vfmkwgtnan.mvl
+    ve_vl_vfmkwgtnan_mvml,                     // llvm.ve.vl.vfmkwgtnan.mvml
+    ve_vl_vfmkwle_mvl,                         // llvm.ve.vl.vfmkwle.mvl
+    ve_vl_vfmkwle_mvml,                        // llvm.ve.vl.vfmkwle.mvml
+    ve_vl_vfmkwlenan_mvl,                      // llvm.ve.vl.vfmkwlenan.mvl
+    ve_vl_vfmkwlenan_mvml,                     // llvm.ve.vl.vfmkwlenan.mvml
+    ve_vl_vfmkwlt_mvl,                         // llvm.ve.vl.vfmkwlt.mvl
+    ve_vl_vfmkwlt_mvml,                        // llvm.ve.vl.vfmkwlt.mvml
+    ve_vl_vfmkwltnan_mvl,                      // llvm.ve.vl.vfmkwltnan.mvl
+    ve_vl_vfmkwltnan_mvml,                     // llvm.ve.vl.vfmkwltnan.mvml
+    ve_vl_vfmkwnan_mvl,                        // llvm.ve.vl.vfmkwnan.mvl
+    ve_vl_vfmkwnan_mvml,                       // llvm.ve.vl.vfmkwnan.mvml
+    ve_vl_vfmkwne_mvl,                         // llvm.ve.vl.vfmkwne.mvl
+    ve_vl_vfmkwne_mvml,                        // llvm.ve.vl.vfmkwne.mvml
+    ve_vl_vfmkwnenan_mvl,                      // llvm.ve.vl.vfmkwnenan.mvl
+    ve_vl_vfmkwnenan_mvml,                     // llvm.ve.vl.vfmkwnenan.mvml
+    ve_vl_vfmkwnum_mvl,                        // llvm.ve.vl.vfmkwnum.mvl
+    ve_vl_vfmkwnum_mvml,                       // llvm.ve.vl.vfmkwnum.mvml
     ve_vl_vfmsbd_vsvvl,                        // llvm.ve.vl.vfmsbd.vsvvl
     ve_vl_vfmsbd_vsvvmvl,                      // llvm.ve.vl.vfmsbd.vsvvmvl
     ve_vl_vfmsbd_vsvvvl,                       // llvm.ve.vl.vfmsbd.vsvvvl
@@ -527,6 +833,22 @@ enum VEIntrinsics : unsigned {
     ve_vl_vfnmsbs_vvvvl,                       // llvm.ve.vl.vfnmsbs.vvvvl
     ve_vl_vfnmsbs_vvvvmvl,                     // llvm.ve.vl.vfnmsbs.vvvvmvl
     ve_vl_vfnmsbs_vvvvvl,                      // llvm.ve.vl.vfnmsbs.vvvvvl
+    ve_vl_vfrmaxdfst_vvl,                      // llvm.ve.vl.vfrmaxdfst.vvl
+    ve_vl_vfrmaxdfst_vvvl,                     // llvm.ve.vl.vfrmaxdfst.vvvl
+    ve_vl_vfrmaxdlst_vvl,                      // llvm.ve.vl.vfrmaxdlst.vvl
+    ve_vl_vfrmaxdlst_vvvl,                     // llvm.ve.vl.vfrmaxdlst.vvvl
+    ve_vl_vfrmaxsfst_vvl,                      // llvm.ve.vl.vfrmaxsfst.vvl
+    ve_vl_vfrmaxsfst_vvvl,                     // llvm.ve.vl.vfrmaxsfst.vvvl
+    ve_vl_vfrmaxslst_vvl,                      // llvm.ve.vl.vfrmaxslst.vvl
+    ve_vl_vfrmaxslst_vvvl,                     // llvm.ve.vl.vfrmaxslst.vvvl
+    ve_vl_vfrmindfst_vvl,                      // llvm.ve.vl.vfrmindfst.vvl
+    ve_vl_vfrmindfst_vvvl,                     // llvm.ve.vl.vfrmindfst.vvvl
+    ve_vl_vfrmindlst_vvl,                      // llvm.ve.vl.vfrmindlst.vvl
+    ve_vl_vfrmindlst_vvvl,                     // llvm.ve.vl.vfrmindlst.vvvl
+    ve_vl_vfrminsfst_vvl,                      // llvm.ve.vl.vfrminsfst.vvl
+    ve_vl_vfrminsfst_vvvl,                     // llvm.ve.vl.vfrminsfst.vvvl
+    ve_vl_vfrminslst_vvl,                      // llvm.ve.vl.vfrminslst.vvl
+    ve_vl_vfrminslst_vvvl,                     // llvm.ve.vl.vfrminslst.vvvl
     ve_vl_vfsqrtd_vvl,                         // llvm.ve.vl.vfsqrtd.vvl
     ve_vl_vfsqrtd_vvvl,                        // llvm.ve.vl.vfsqrtd.vvvl
     ve_vl_vfsqrts_vvl,                         // llvm.ve.vl.vfsqrts.vvl
@@ -543,6 +865,42 @@ enum VEIntrinsics : unsigned {
     ve_vl_vfsubs_vvvl,                         // llvm.ve.vl.vfsubs.vvvl
     ve_vl_vfsubs_vvvmvl,                       // llvm.ve.vl.vfsubs.vvvmvl
     ve_vl_vfsubs_vvvvl,                        // llvm.ve.vl.vfsubs.vvvvl
+    ve_vl_vfsumd_vvl,                          // llvm.ve.vl.vfsumd.vvl
+    ve_vl_vfsumd_vvml,                         // llvm.ve.vl.vfsumd.vvml
+    ve_vl_vfsums_vvl,                          // llvm.ve.vl.vfsums.vvl
+    ve_vl_vfsums_vvml,                         // llvm.ve.vl.vfsums.vvml
+    ve_vl_vgt_vvssl,                           // llvm.ve.vl.vgt.vvssl
+    ve_vl_vgt_vvssml,                          // llvm.ve.vl.vgt.vvssml
+    ve_vl_vgt_vvssmvl,                         // llvm.ve.vl.vgt.vvssmvl
+    ve_vl_vgt_vvssvl,                          // llvm.ve.vl.vgt.vvssvl
+    ve_vl_vgtlsx_vvssl,                        // llvm.ve.vl.vgtlsx.vvssl
+    ve_vl_vgtlsx_vvssml,                       // llvm.ve.vl.vgtlsx.vvssml
+    ve_vl_vgtlsx_vvssmvl,                      // llvm.ve.vl.vgtlsx.vvssmvl
+    ve_vl_vgtlsx_vvssvl,                       // llvm.ve.vl.vgtlsx.vvssvl
+    ve_vl_vgtlsxnc_vvssl,                      // llvm.ve.vl.vgtlsxnc.vvssl
+    ve_vl_vgtlsxnc_vvssml,                     // llvm.ve.vl.vgtlsxnc.vvssml
+    ve_vl_vgtlsxnc_vvssmvl,                    // llvm.ve.vl.vgtlsxnc.vvssmvl
+    ve_vl_vgtlsxnc_vvssvl,                     // llvm.ve.vl.vgtlsxnc.vvssvl
+    ve_vl_vgtlzx_vvssl,                        // llvm.ve.vl.vgtlzx.vvssl
+    ve_vl_vgtlzx_vvssml,                       // llvm.ve.vl.vgtlzx.vvssml
+    ve_vl_vgtlzx_vvssmvl,                      // llvm.ve.vl.vgtlzx.vvssmvl
+    ve_vl_vgtlzx_vvssvl,                       // llvm.ve.vl.vgtlzx.vvssvl
+    ve_vl_vgtlzxnc_vvssl,                      // llvm.ve.vl.vgtlzxnc.vvssl
+    ve_vl_vgtlzxnc_vvssml,                     // llvm.ve.vl.vgtlzxnc.vvssml
+    ve_vl_vgtlzxnc_vvssmvl,                    // llvm.ve.vl.vgtlzxnc.vvssmvl
+    ve_vl_vgtlzxnc_vvssvl,                     // llvm.ve.vl.vgtlzxnc.vvssvl
+    ve_vl_vgtnc_vvssl,                         // llvm.ve.vl.vgtnc.vvssl
+    ve_vl_vgtnc_vvssml,                        // llvm.ve.vl.vgtnc.vvssml
+    ve_vl_vgtnc_vvssmvl,                       // llvm.ve.vl.vgtnc.vvssmvl
+    ve_vl_vgtnc_vvssvl,                        // llvm.ve.vl.vgtnc.vvssvl
+    ve_vl_vgtu_vvssl,                          // llvm.ve.vl.vgtu.vvssl
+    ve_vl_vgtu_vvssml,                         // llvm.ve.vl.vgtu.vvssml
+    ve_vl_vgtu_vvssmvl,                        // llvm.ve.vl.vgtu.vvssmvl
+    ve_vl_vgtu_vvssvl,                         // llvm.ve.vl.vgtu.vvssvl
+    ve_vl_vgtunc_vvssl,                        // llvm.ve.vl.vgtunc.vvssl
+    ve_vl_vgtunc_vvssml,                       // llvm.ve.vl.vgtunc.vvssml
+    ve_vl_vgtunc_vvssmvl,                      // llvm.ve.vl.vgtunc.vvssmvl
+    ve_vl_vgtunc_vvssvl,                       // llvm.ve.vl.vgtunc.vvssvl
     ve_vl_vld_vssl,                            // llvm.ve.vl.vld.vssl
     ve_vl_vld_vssvl,                           // llvm.ve.vl.vld.vssvl
     ve_vl_vld2d_vssl,                          // llvm.ve.vl.vld2d.vssl
@@ -662,10 +1020,38 @@ enum VEIntrinsics : unsigned {
     ve_vl_vor_vvvl,                            // llvm.ve.vl.vor.vvvl
     ve_vl_vor_vvvmvl,                          // llvm.ve.vl.vor.vvvmvl
     ve_vl_vor_vvvvl,                           // llvm.ve.vl.vor.vvvvl
+    ve_vl_vrand_vvl,                           // llvm.ve.vl.vrand.vvl
+    ve_vl_vrand_vvml,                          // llvm.ve.vl.vrand.vvml
     ve_vl_vrcpd_vvl,                           // llvm.ve.vl.vrcpd.vvl
     ve_vl_vrcpd_vvvl,                          // llvm.ve.vl.vrcpd.vvvl
     ve_vl_vrcps_vvl,                           // llvm.ve.vl.vrcps.vvl
     ve_vl_vrcps_vvvl,                          // llvm.ve.vl.vrcps.vvvl
+    ve_vl_vrmaxslfst_vvl,                      // llvm.ve.vl.vrmaxslfst.vvl
+    ve_vl_vrmaxslfst_vvvl,                     // llvm.ve.vl.vrmaxslfst.vvvl
+    ve_vl_vrmaxsllst_vvl,                      // llvm.ve.vl.vrmaxsllst.vvl
+    ve_vl_vrmaxsllst_vvvl,                     // llvm.ve.vl.vrmaxsllst.vvvl
+    ve_vl_vrmaxswfstsx_vvl,                    // llvm.ve.vl.vrmaxswfstsx.vvl
+    ve_vl_vrmaxswfstsx_vvvl,                   // llvm.ve.vl.vrmaxswfstsx.vvvl
+    ve_vl_vrmaxswfstzx_vvl,                    // llvm.ve.vl.vrmaxswfstzx.vvl
+    ve_vl_vrmaxswfstzx_vvvl,                   // llvm.ve.vl.vrmaxswfstzx.vvvl
+    ve_vl_vrmaxswlstsx_vvl,                    // llvm.ve.vl.vrmaxswlstsx.vvl
+    ve_vl_vrmaxswlstsx_vvvl,                   // llvm.ve.vl.vrmaxswlstsx.vvvl
+    ve_vl_vrmaxswlstzx_vvl,                    // llvm.ve.vl.vrmaxswlstzx.vvl
+    ve_vl_vrmaxswlstzx_vvvl,                   // llvm.ve.vl.vrmaxswlstzx.vvvl
+    ve_vl_vrminslfst_vvl,                      // llvm.ve.vl.vrminslfst.vvl
+    ve_vl_vrminslfst_vvvl,                     // llvm.ve.vl.vrminslfst.vvvl
+    ve_vl_vrminsllst_vvl,                      // llvm.ve.vl.vrminsllst.vvl
+    ve_vl_vrminsllst_vvvl,                     // llvm.ve.vl.vrminsllst.vvvl
+    ve_vl_vrminswfstsx_vvl,                    // llvm.ve.vl.vrminswfstsx.vvl
+    ve_vl_vrminswfstsx_vvvl,                   // llvm.ve.vl.vrminswfstsx.vvvl
+    ve_vl_vrminswfstzx_vvl,                    // llvm.ve.vl.vrminswfstzx.vvl
+    ve_vl_vrminswfstzx_vvvl,                   // llvm.ve.vl.vrminswfstzx.vvvl
+    ve_vl_vrminswlstsx_vvl,                    // llvm.ve.vl.vrminswlstsx.vvl
+    ve_vl_vrminswlstsx_vvvl,                   // llvm.ve.vl.vrminswlstsx.vvvl
+    ve_vl_vrminswlstzx_vvl,                    // llvm.ve.vl.vrminswlstzx.vvl
+    ve_vl_vrminswlstzx_vvvl,                   // llvm.ve.vl.vrminswlstzx.vvvl
+    ve_vl_vror_vvl,                            // llvm.ve.vl.vror.vvl
+    ve_vl_vror_vvml,                           // llvm.ve.vl.vror.vvml
     ve_vl_vrsqrtd_vvl,                         // llvm.ve.vl.vrsqrtd.vvl
     ve_vl_vrsqrtd_vvvl,                        // llvm.ve.vl.vrsqrtd.vvvl
     ve_vl_vrsqrtdnex_vvl,                      // llvm.ve.vl.vrsqrtdnex.vvl
@@ -674,6 +1060,32 @@ enum VEIntrinsics : unsigned {
     ve_vl_vrsqrts_vvvl,                        // llvm.ve.vl.vrsqrts.vvvl
     ve_vl_vrsqrtsnex_vvl,                      // llvm.ve.vl.vrsqrtsnex.vvl
     ve_vl_vrsqrtsnex_vvvl,                     // llvm.ve.vl.vrsqrtsnex.vvvl
+    ve_vl_vrxor_vvl,                           // llvm.ve.vl.vrxor.vvl
+    ve_vl_vrxor_vvml,                          // llvm.ve.vl.vrxor.vvml
+    ve_vl_vsc_vvssl,                           // llvm.ve.vl.vsc.vvssl
+    ve_vl_vsc_vvssml,                          // llvm.ve.vl.vsc.vvssml
+    ve_vl_vscl_vvssl,                          // llvm.ve.vl.vscl.vvssl
+    ve_vl_vscl_vvssml,                         // llvm.ve.vl.vscl.vvssml
+    ve_vl_vsclnc_vvssl,                        // llvm.ve.vl.vsclnc.vvssl
+    ve_vl_vsclnc_vvssml,                       // llvm.ve.vl.vsclnc.vvssml
+    ve_vl_vsclncot_vvssl,                      // llvm.ve.vl.vsclncot.vvssl
+    ve_vl_vsclncot_vvssml,                     // llvm.ve.vl.vsclncot.vvssml
+    ve_vl_vsclot_vvssl,                        // llvm.ve.vl.vsclot.vvssl
+    ve_vl_vsclot_vvssml,                       // llvm.ve.vl.vsclot.vvssml
+    ve_vl_vscnc_vvssl,                         // llvm.ve.vl.vscnc.vvssl
+    ve_vl_vscnc_vvssml,                        // llvm.ve.vl.vscnc.vvssml
+    ve_vl_vscncot_vvssl,                       // llvm.ve.vl.vscncot.vvssl
+    ve_vl_vscncot_vvssml,                      // llvm.ve.vl.vscncot.vvssml
+    ve_vl_vscot_vvssl,                         // llvm.ve.vl.vscot.vvssl
+    ve_vl_vscot_vvssml,                        // llvm.ve.vl.vscot.vvssml
+    ve_vl_vscu_vvssl,                          // llvm.ve.vl.vscu.vvssl
+    ve_vl_vscu_vvssml,                         // llvm.ve.vl.vscu.vvssml
+    ve_vl_vscunc_vvssl,                        // llvm.ve.vl.vscunc.vvssl
+    ve_vl_vscunc_vvssml,                       // llvm.ve.vl.vscunc.vvssml
+    ve_vl_vscuncot_vvssl,                      // llvm.ve.vl.vscuncot.vvssl
+    ve_vl_vscuncot_vvssml,                     // llvm.ve.vl.vscuncot.vvssml
+    ve_vl_vscuot_vvssl,                        // llvm.ve.vl.vscuot.vvssl
+    ve_vl_vscuot_vvssml,                       // llvm.ve.vl.vscuot.vvssml
     ve_vl_vseq_vl,                             // llvm.ve.vl.vseq.vl
     ve_vl_vseq_vvl,                            // llvm.ve.vl.vseq.vvl
     ve_vl_vsfa_vvssl,                          // llvm.ve.vl.vsfa.vvssl
@@ -807,12 +1219,20 @@ enum VEIntrinsics : unsigned {
     ve_vl_vsubuw_vvvl,                         // llvm.ve.vl.vsubuw.vvvl
     ve_vl_vsubuw_vvvmvl,                       // llvm.ve.vl.vsubuw.vvvmvl
     ve_vl_vsubuw_vvvvl,                        // llvm.ve.vl.vsubuw.vvvvl
+    ve_vl_vsuml_vvl,                           // llvm.ve.vl.vsuml.vvl
+    ve_vl_vsuml_vvml,                          // llvm.ve.vl.vsuml.vvml
+    ve_vl_vsumwsx_vvl,                         // llvm.ve.vl.vsumwsx.vvl
+    ve_vl_vsumwsx_vvml,                        // llvm.ve.vl.vsumwsx.vvml
+    ve_vl_vsumwzx_vvl,                         // llvm.ve.vl.vsumwzx.vvl
+    ve_vl_vsumwzx_vvml,                        // llvm.ve.vl.vsumwzx.vvml
     ve_vl_vxor_vsvl,                           // llvm.ve.vl.vxor.vsvl
     ve_vl_vxor_vsvmvl,                         // llvm.ve.vl.vxor.vsvmvl
     ve_vl_vxor_vsvvl,                          // llvm.ve.vl.vxor.vsvvl
     ve_vl_vxor_vvvl,                           // llvm.ve.vl.vxor.vvvl
     ve_vl_vxor_vvvmvl,                         // llvm.ve.vl.vxor.vvvmvl
     ve_vl_vxor_vvvvl,                          // llvm.ve.vl.vxor.vvvvl
+    ve_vl_xorm_MMM,                            // llvm.ve.vl.xorm.MMM
+    ve_vl_xorm_mmm,                            // llvm.ve.vl.xorm.mmm
 }; // enum
 } // namespace Intrinsic
 } // namespace llvm

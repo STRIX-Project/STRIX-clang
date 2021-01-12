@@ -1435,6 +1435,52 @@ public:
   static bool classof(const Attr *A) { return A->getKind() == attr::AssumeAligned; }
 };
 
+class AssumptionAttr : public InheritableAttr {
+unsigned assumptionLength;
+char *assumption;
+
+public:
+  enum Spelling {
+    GNU_assume = 0,
+    CXX11_clang_assume = 1,
+    C2x_clang_assume = 2,
+  SpellingNotCalculated = 15
+
+  };
+
+  // Factory methods
+  static AssumptionAttr *CreateImplicit(ASTContext &Ctx, llvm::StringRef Assumption, const AttributeCommonInfo &CommonInfo = {SourceRange{}});
+  static AssumptionAttr *Create(ASTContext &Ctx, llvm::StringRef Assumption, const AttributeCommonInfo &CommonInfo);
+  static AssumptionAttr *CreateImplicit(ASTContext &Ctx, llvm::StringRef Assumption, SourceRange Range, AttributeCommonInfo::Syntax Syntax);
+  static AssumptionAttr *Create(ASTContext &Ctx, llvm::StringRef Assumption, SourceRange Range, AttributeCommonInfo::Syntax Syntax);
+
+  // Constructors
+  AssumptionAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
+              , llvm::StringRef Assumption
+             );
+
+  AssumptionAttr *clone(ASTContext &C) const;
+  void printPretty(raw_ostream &OS,
+                   const PrintingPolicy &Policy) const;
+  const char *getSpelling() const;
+  llvm::StringRef getAssumption() const {
+    return llvm::StringRef(assumption, assumptionLength);
+  }
+  unsigned getAssumptionLength() const {
+    return assumptionLength;
+  }
+  void setAssumption(ASTContext &C, llvm::StringRef S) {
+    assumptionLength = S.size();
+    this->assumption = new (C, 1) char [assumptionLength];
+    if (!S.empty())
+      std::memcpy(this->assumption, S.data(), assumptionLength);
+  }
+
+
+
+  static bool classof(const Attr *A) { return A->getKind() == attr::Assumption; }
+};
+
 class AvailabilityAttr : public InheritableAttr {
 IdentifierInfo * platform;
 
@@ -2422,6 +2468,35 @@ public:
   static bool classof(const Attr *A) { return A->getKind() == attr::Callback; }
 };
 
+class CalledOnceAttr : public Attr {
+public:
+  enum Spelling {
+    GNU_called_once = 0,
+    CXX11_clang_called_once = 1,
+    C2x_clang_called_once = 2,
+  SpellingNotCalculated = 15
+
+  };
+
+  // Factory methods
+  static CalledOnceAttr *CreateImplicit(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo = {SourceRange{}});
+  static CalledOnceAttr *Create(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo);
+  static CalledOnceAttr *CreateImplicit(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax);
+  static CalledOnceAttr *Create(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax);
+
+  // Constructors
+  CalledOnceAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
+             );
+
+  CalledOnceAttr *clone(ASTContext &C) const;
+  void printPretty(raw_ostream &OS,
+                   const PrintingPolicy &Policy) const;
+  const char *getSpelling() const;
+
+
+  static bool classof(const Attr *A) { return A->getKind() == attr::CalledOnce; }
+};
+
 class CapabilityAttr : public InheritableAttr {
 unsigned nameLength;
 char *name;
@@ -3322,6 +3397,98 @@ public:
   static bool classof(const Attr *A) { return A->getKind() == attr::EnableIf; }
 };
 
+class EnforceTCBAttr : public InheritableAttr {
+unsigned tCBNameLength;
+char *tCBName;
+
+public:
+  enum Spelling {
+    GNU_enforce_tcb = 0,
+    CXX11_clang_enforce_tcb = 1,
+    C2x_clang_enforce_tcb = 2,
+  SpellingNotCalculated = 15
+
+  };
+
+  // Factory methods
+  static EnforceTCBAttr *CreateImplicit(ASTContext &Ctx, llvm::StringRef TCBName, const AttributeCommonInfo &CommonInfo = {SourceRange{}});
+  static EnforceTCBAttr *Create(ASTContext &Ctx, llvm::StringRef TCBName, const AttributeCommonInfo &CommonInfo);
+  static EnforceTCBAttr *CreateImplicit(ASTContext &Ctx, llvm::StringRef TCBName, SourceRange Range, AttributeCommonInfo::Syntax Syntax);
+  static EnforceTCBAttr *Create(ASTContext &Ctx, llvm::StringRef TCBName, SourceRange Range, AttributeCommonInfo::Syntax Syntax);
+
+  // Constructors
+  EnforceTCBAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
+              , llvm::StringRef TCBName
+             );
+
+  EnforceTCBAttr *clone(ASTContext &C) const;
+  void printPretty(raw_ostream &OS,
+                   const PrintingPolicy &Policy) const;
+  const char *getSpelling() const;
+  llvm::StringRef getTCBName() const {
+    return llvm::StringRef(tCBName, tCBNameLength);
+  }
+  unsigned getTCBNameLength() const {
+    return tCBNameLength;
+  }
+  void setTCBName(ASTContext &C, llvm::StringRef S) {
+    tCBNameLength = S.size();
+    this->tCBName = new (C, 1) char [tCBNameLength];
+    if (!S.empty())
+      std::memcpy(this->tCBName, S.data(), tCBNameLength);
+  }
+
+
+
+  static bool classof(const Attr *A) { return A->getKind() == attr::EnforceTCB; }
+};
+
+class EnforceTCBLeafAttr : public InheritableAttr {
+unsigned tCBNameLength;
+char *tCBName;
+
+public:
+  enum Spelling {
+    GNU_enforce_tcb_leaf = 0,
+    CXX11_clang_enforce_tcb_leaf = 1,
+    C2x_clang_enforce_tcb_leaf = 2,
+  SpellingNotCalculated = 15
+
+  };
+
+  // Factory methods
+  static EnforceTCBLeafAttr *CreateImplicit(ASTContext &Ctx, llvm::StringRef TCBName, const AttributeCommonInfo &CommonInfo = {SourceRange{}});
+  static EnforceTCBLeafAttr *Create(ASTContext &Ctx, llvm::StringRef TCBName, const AttributeCommonInfo &CommonInfo);
+  static EnforceTCBLeafAttr *CreateImplicit(ASTContext &Ctx, llvm::StringRef TCBName, SourceRange Range, AttributeCommonInfo::Syntax Syntax);
+  static EnforceTCBLeafAttr *Create(ASTContext &Ctx, llvm::StringRef TCBName, SourceRange Range, AttributeCommonInfo::Syntax Syntax);
+
+  // Constructors
+  EnforceTCBLeafAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
+              , llvm::StringRef TCBName
+             );
+
+  EnforceTCBLeafAttr *clone(ASTContext &C) const;
+  void printPretty(raw_ostream &OS,
+                   const PrintingPolicy &Policy) const;
+  const char *getSpelling() const;
+  llvm::StringRef getTCBName() const {
+    return llvm::StringRef(tCBName, tCBNameLength);
+  }
+  unsigned getTCBNameLength() const {
+    return tCBNameLength;
+  }
+  void setTCBName(ASTContext &C, llvm::StringRef S) {
+    tCBNameLength = S.size();
+    this->tCBName = new (C, 1) char [tCBNameLength];
+    if (!S.empty())
+      std::memcpy(this->tCBName, S.data(), tCBNameLength);
+  }
+
+
+
+  static bool classof(const Attr *A) { return A->getKind() == attr::EnforceTCBLeaf; }
+};
+
 class EnumExtensibilityAttr : public InheritableAttr {
 public:
   enum Kind {
@@ -4194,6 +4361,35 @@ public:
   static bool classof(const Attr *A) { return A->getKind() == attr::LayoutVersion; }
 };
 
+class LeafAttr : public InheritableAttr {
+public:
+  enum Spelling {
+    GNU_leaf = 0,
+    CXX11_gnu_leaf = 1,
+    C2x_gnu_leaf = 2,
+  SpellingNotCalculated = 15
+
+  };
+
+  // Factory methods
+  static LeafAttr *CreateImplicit(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo = {SourceRange{}});
+  static LeafAttr *Create(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo);
+  static LeafAttr *CreateImplicit(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax);
+  static LeafAttr *Create(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax);
+
+  // Constructors
+  LeafAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
+             );
+
+  LeafAttr *clone(ASTContext &C) const;
+  void printPretty(raw_ostream &OS,
+                   const PrintingPolicy &Policy) const;
+  const char *getSpelling() const;
+
+
+  static bool classof(const Attr *A) { return A->getKind() == attr::Leaf; }
+};
+
 class LifetimeBoundAttr : public InheritableAttr {
 public:
   enum Spelling {
@@ -4365,6 +4561,8 @@ public:
     Enable,
     Disable,
     Numeric,
+    FixedWidth,
+    ScalableWidth,
     AssumeSafety,
     Full
   };
@@ -5527,7 +5725,7 @@ public:
   static bool classof(const Attr *A) { return A->getKind() == attr::NoInstrumentFunction; }
 };
 
-class NoMergeAttr : public StmtAttr {
+class NoMergeAttr : public DeclOrStmtAttr {
 public:
   enum Spelling {
     GNU_nomerge = 0,
@@ -8347,6 +8545,43 @@ public:
   static bool classof(const Attr *A) { return A->getKind() == attr::PragmaClangTextSection; }
 };
 
+class PreferredNameAttr : public InheritableAttr {
+TypeSourceInfo * typedefType;
+
+public:
+  enum Spelling {
+    GNU_preferred_name = 0,
+    CXX11_clang_preferred_name = 1,
+  SpellingNotCalculated = 15
+
+  };
+
+  // Factory methods
+  static PreferredNameAttr *CreateImplicit(ASTContext &Ctx, TypeSourceInfo * TypedefType, const AttributeCommonInfo &CommonInfo = {SourceRange{}});
+  static PreferredNameAttr *Create(ASTContext &Ctx, TypeSourceInfo * TypedefType, const AttributeCommonInfo &CommonInfo);
+  static PreferredNameAttr *CreateImplicit(ASTContext &Ctx, TypeSourceInfo * TypedefType, SourceRange Range, AttributeCommonInfo::Syntax Syntax);
+  static PreferredNameAttr *Create(ASTContext &Ctx, TypeSourceInfo * TypedefType, SourceRange Range, AttributeCommonInfo::Syntax Syntax);
+
+  // Constructors
+  PreferredNameAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
+              , TypeSourceInfo * TypedefType
+             );
+
+  PreferredNameAttr *clone(ASTContext &C) const;
+  void printPretty(raw_ostream &OS,
+                   const PrintingPolicy &Policy) const;
+  const char *getSpelling() const;
+  QualType getTypedefType() const {
+    return typedefType->getType();
+  }  TypeSourceInfo * getTypedefTypeLoc() const {
+    return typedefType;
+  }
+
+
+
+  static bool classof(const Attr *A) { return A->getKind() == attr::PreferredName; }
+};
+
 class PreserveAllAttr : public InheritableAttr {
 public:
   enum Spelling {
@@ -9390,6 +9625,61 @@ public:
   static bool classof(const Attr *A) { return A->getKind() == attr::Suppress; }
 };
 
+class SwiftAsyncAttr : public InheritableAttr {
+public:
+  enum Kind {
+    None,
+    SwiftPrivate,
+    NotSwiftPrivate
+  };
+private:
+  Kind kind;
+
+ParamIdx completionHandlerIndex;
+
+public:
+  enum Spelling {
+    GNU_swift_async = 0,
+    CXX11_clang_swift_async = 1,
+    C2x_clang_swift_async = 2,
+  SpellingNotCalculated = 15
+
+  };
+
+  // Factory methods
+  static SwiftAsyncAttr *CreateImplicit(ASTContext &Ctx, Kind Kind, ParamIdx CompletionHandlerIndex, const AttributeCommonInfo &CommonInfo = {SourceRange{}});
+  static SwiftAsyncAttr *Create(ASTContext &Ctx, Kind Kind, ParamIdx CompletionHandlerIndex, const AttributeCommonInfo &CommonInfo);
+  static SwiftAsyncAttr *CreateImplicit(ASTContext &Ctx, Kind Kind, ParamIdx CompletionHandlerIndex, SourceRange Range, AttributeCommonInfo::Syntax Syntax);
+  static SwiftAsyncAttr *Create(ASTContext &Ctx, Kind Kind, ParamIdx CompletionHandlerIndex, SourceRange Range, AttributeCommonInfo::Syntax Syntax);
+
+  // Constructors
+  SwiftAsyncAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
+              , Kind Kind
+              , ParamIdx CompletionHandlerIndex
+             );
+  SwiftAsyncAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
+              , Kind Kind
+             );
+
+  SwiftAsyncAttr *clone(ASTContext &C) const;
+  void printPretty(raw_ostream &OS,
+                   const PrintingPolicy &Policy) const;
+  const char *getSpelling() const;
+  Kind getKind() const {
+    return kind;
+  }
+
+  static bool ConvertStrToKind(StringRef Val, Kind &Out);
+  static const char *ConvertKindToStr(Kind Val);
+  ParamIdx getCompletionHandlerIndex() const {
+    return completionHandlerIndex;
+  }
+
+
+
+  static bool classof(const Attr *A) { return A->getKind() == attr::SwiftAsync; }
+};
+
 class SwiftAsyncNameAttr : public InheritableAttr {
 unsigned nameLength;
 char *name;
@@ -10280,6 +10570,27 @@ public:
 
 
   static bool classof(const Attr *A) { return A->getKind() == attr::TypeNullable; }
+};
+
+class TypeNullableResultAttr : public TypeAttr {
+public:
+  // Factory methods
+  static TypeNullableResultAttr *CreateImplicit(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo = {SourceRange{}});
+  static TypeNullableResultAttr *Create(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo);
+  static TypeNullableResultAttr *CreateImplicit(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax);
+  static TypeNullableResultAttr *Create(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax);
+
+  // Constructors
+  TypeNullableResultAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
+             );
+
+  TypeNullableResultAttr *clone(ASTContext &C) const;
+  void printPretty(raw_ostream &OS,
+                   const PrintingPolicy &Policy) const;
+  const char *getSpelling() const;
+
+
+  static bool classof(const Attr *A) { return A->getKind() == attr::TypeNullableResult; }
 };
 
 class TypeTagForDatatypeAttr : public InheritableAttr {

@@ -35,6 +35,7 @@
     coro_destroy,                              // llvm.coro.destroy
     coro_done,                                 // llvm.coro.done
     coro_end,                                  // llvm.coro.end
+    coro_end_async,                            // llvm.coro.end.async
     coro_frame,                                // llvm.coro.frame
     coro_free,                                 // llvm.coro.free
     coro_id,                                   // llvm.coro.id
@@ -129,12 +130,16 @@
     experimental_patchpoint_i64,               // llvm.experimental.patchpoint.i64
     experimental_patchpoint_void,              // llvm.experimental.patchpoint.void
     experimental_stackmap,                     // llvm.experimental.stackmap
+    experimental_vector_extract,               // llvm.experimental.vector.extract
+    experimental_vector_insert,                // llvm.experimental.vector.insert
     experimental_widenable_condition,          // llvm.experimental.widenable.condition
     fabs,                                      // llvm.fabs
     floor,                                     // llvm.floor
     flt_rounds,                                // llvm.flt.rounds
     fma,                                       // llvm.fma
     fmuladd,                                   // llvm.fmuladd
+    fptosi_sat,                                // llvm.fptosi.sat
+    fptoui_sat,                                // llvm.fptoui.sat
     frameaddress,                              // llvm.frameaddress
     fshl,                                      // llvm.fshl
     fshr,                                      // llvm.fshr
@@ -271,6 +276,7 @@
     type_test,                                 // llvm.type.test
     uadd_sat,                                  // llvm.uadd.sat
     uadd_with_overflow,                        // llvm.uadd.with.overflow
+    ubsantrap,                                 // llvm.ubsantrap
     udiv_fix,                                  // llvm.udiv.fix
     udiv_fix_sat,                              // llvm.udiv.fix.sat
     umax,                                      // llvm.umax
@@ -315,4 +321,4 @@
     write_register,                            // llvm.write_register
     xray_customevent,                          // llvm.xray.customevent
     xray_typedevent,                           // llvm.xray.typedevent
-    num_intrinsics = 8966
+    num_intrinsics = 9755

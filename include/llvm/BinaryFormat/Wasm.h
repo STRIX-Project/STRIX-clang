@@ -202,7 +202,8 @@ struct WasmSymbolInfo {
 
 enum class NameType {
   FUNCTION,
-  GLOBAL
+  GLOBAL,
+  DATA_SEGMENT,
 };
 
 struct WasmDebugName {
@@ -243,7 +244,6 @@ enum : unsigned {
   WASM_TYPE_F64 = 0x7C,
   WASM_TYPE_V128 = 0x7B,
   WASM_TYPE_FUNCREF = 0x70,
-  WASM_TYPE_EXNREF = 0x68,
   WASM_TYPE_EXTERNREF = 0x6F,
   WASM_TYPE_FUNC = 0x60,
   WASM_TYPE_NORESULT = 0x40, // for blocks with no result values
@@ -313,9 +313,10 @@ enum : uint8_t {
 
 // Kind codes used in the custom "name" section
 enum : unsigned {
-  WASM_NAMES_FUNCTION = 0x1,
-  WASM_NAMES_LOCAL = 0x2,
-  WASM_NAMES_GLOBAL = 0x7,
+  WASM_NAMES_FUNCTION = 1,
+  WASM_NAMES_LOCAL = 2,
+  WASM_NAMES_GLOBAL = 7,
+  WASM_NAMES_DATA_SEGMENT = 9,
 };
 
 // Kind codes used in the custom "linking" section
@@ -330,6 +331,8 @@ enum : unsigned {
 enum : unsigned {
   WASM_COMDAT_DATA = 0x0,
   WASM_COMDAT_FUNCTION = 0x1,
+  // GLOBAL, EVENT, and TABLE are in here but LLVM doesn't use them yet.
+  WASM_COMDAT_SECTION = 0x5,
 };
 
 // Kind codes used in the custom "linking" section in the WASM_SYMBOL_TABLE
@@ -375,7 +378,6 @@ enum class ValType {
   F32 = WASM_TYPE_F32,
   F64 = WASM_TYPE_F64,
   V128 = WASM_TYPE_V128,
-  EXNREF = WASM_TYPE_EXNREF,
   FUNCREF = WASM_TYPE_FUNCREF,
   EXTERNREF = WASM_TYPE_EXTERNREF,
 };

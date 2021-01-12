@@ -11,8 +11,10 @@ LLVM_ENABLE_BITMASK_ENUMS_IN_NAMESPACE();
 
 enum class Directive {
   OMPD_allocate,
+  OMPD_assumes,
   OMPD_atomic,
   OMPD_barrier,
+  OMPD_begin_assumes,
   OMPD_begin_declare_variant,
   OMPD_cancel,
   OMPD_cancellation_point,
@@ -31,6 +33,7 @@ enum class Directive {
   OMPD_distribute_simd,
   OMPD_do,
   OMPD_do_simd,
+  OMPD_end_assumes,
   OMPD_end_declare_target,
   OMPD_end_declare_variant,
   OMPD_end_do,
@@ -97,11 +100,13 @@ enum class Directive {
   OMPD_workshare,
 };
 
-static constexpr std::size_t Directive_enumSize = 85;
+static constexpr std::size_t Directive_enumSize = 88;
 
 constexpr auto OMPD_allocate = llvm::omp::Directive::OMPD_allocate;
+constexpr auto OMPD_assumes = llvm::omp::Directive::OMPD_assumes;
 constexpr auto OMPD_atomic = llvm::omp::Directive::OMPD_atomic;
 constexpr auto OMPD_barrier = llvm::omp::Directive::OMPD_barrier;
+constexpr auto OMPD_begin_assumes = llvm::omp::Directive::OMPD_begin_assumes;
 constexpr auto OMPD_begin_declare_variant = llvm::omp::Directive::OMPD_begin_declare_variant;
 constexpr auto OMPD_cancel = llvm::omp::Directive::OMPD_cancel;
 constexpr auto OMPD_cancellation_point = llvm::omp::Directive::OMPD_cancellation_point;
@@ -120,6 +125,7 @@ constexpr auto OMPD_distribute_parallel_for_simd = llvm::omp::Directive::OMPD_di
 constexpr auto OMPD_distribute_simd = llvm::omp::Directive::OMPD_distribute_simd;
 constexpr auto OMPD_do = llvm::omp::Directive::OMPD_do;
 constexpr auto OMPD_do_simd = llvm::omp::Directive::OMPD_do_simd;
+constexpr auto OMPD_end_assumes = llvm::omp::Directive::OMPD_end_assumes;
 constexpr auto OMPD_end_declare_target = llvm::omp::Directive::OMPD_end_declare_target;
 constexpr auto OMPD_end_declare_variant = llvm::omp::Directive::OMPD_end_declare_variant;
 constexpr auto OMPD_end_do = llvm::omp::Directive::OMPD_end_do;
@@ -394,8 +400,11 @@ llvm::StringRef getOpenMPClauseName(Clause C);
 bool isAllowedClauseForDirective(Directive D, Clause C, unsigned Version);
 
 OrderKind getOrderKind(StringRef);
+llvm::StringRef getOpenMPOrderKindName(OrderKind);
 ProcBindKind getProcBindKind(StringRef);
+llvm::StringRef getOpenMPProcBindKindName(ProcBindKind);
 ScheduleKind getScheduleKind(StringRef);
+llvm::StringRef getOpenMPScheduleKindName(ScheduleKind);
 
 } // namespace omp
 } // namespace llvm
